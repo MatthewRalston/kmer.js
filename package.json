@@ -1,0 +1,26 @@
+{
+  "name": "kmers",
+  "version": "0.0.1",
+  "description": "A javascript module and CLI for shredding sequences into k-mers.",
+  "main": "./kmer.js",
+  "scripts": {
+    "test": "./node_modules/.bin/nyc --reporter=html --reporter=text ./node_modules/.bin/mocha test/*_spec.js",
+    "bench": "node ./test/kmer_perf.js",
+      "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls"
+  },
+  "keywords": [
+    "bio"
+  ],
+  "author": "Matthew Ralston <mrals89@gmail.com>",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "mocha": "^4.1.0",
+    "nyc": "^11.4.1"
+  },
+  "dependencies": {
+    "benchmark": "^2.1.4",
+    "type-of-is": "^3.5.1"
+  }
+}
