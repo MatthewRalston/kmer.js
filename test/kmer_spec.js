@@ -1,4 +1,4 @@
-
+'use-strict';
 const expect = require("chai").expect;
 kmers = require("./../");
 
@@ -94,7 +94,7 @@ describe("kmers()", function(){
 	it("returns the theoretical maximum (n!/(n-k)! = n-k+1) substrings", function(){
 	    // Test all cases where 0 < k < n and prove that the theoretically correct number of substrings is calculated.
 	    for (i=1; i < s.length; i++){
-		let maxLength = theoreticalMaximumSimple(s.length, i);
+		var maxLength = theoreticalMaximumSimple(s.length, i);
 		expect(kmers(s, i)).to.have.lengthOf(maxLength);
 	    }
 	});

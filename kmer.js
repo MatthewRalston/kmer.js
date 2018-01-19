@@ -1,3 +1,5 @@
+'use strict';
+
 const Type=require('type-of-is');
 
 

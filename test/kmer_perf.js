@@ -1,5 +1,5 @@
 #!/bin/env node
-
+'use strict';
 const kmers = require('./../');
 const Benchmark = require('benchmark');
 var suite = new Benchmark.Suite
@@ -17,11 +17,11 @@ function constantN(k){
 };
 
 function constantK(){
-    let min = 10;
-    let max = 100;
+    var min = 10;
+    var max = 100;
     for (i = min; i < max; i++){
-	let s = Array(i).fill(1).join('');
-	let k = Math.floor(i*0.45);
+	var s = Array(i).fill(1).join('');
+	var k = Math.floor(i*0.45);
 	suite.add(`kmers() with string '${s}' (length ${s.length}) and k = ${k}`, function(){
 	    kmers(s, k);
 	});
