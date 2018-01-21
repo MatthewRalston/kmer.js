@@ -8,7 +8,7 @@ var suite = new Benchmark.Suite
 
 function constantN(k){
     const s = "helloworld";
-    for (i = 1; i < s.length; i++){
+    for (var i = 1; i < s.length; i++){
 	suite.add(`kmers() with string 'helloworld' (length 10) and k = ${i}`, function(){
 	    kmers(s, i);
 	});
@@ -19,7 +19,7 @@ function constantN(k){
 function constantK(){
     var min = 10;
     var max = 100;
-    for (i = min; i < max; i++){
+    for (var i = min; i < max; i++){
 	var s = Array(i).fill(1).join('');
 	var k = Math.floor(i*0.45);
 	suite.add(`kmers() with string '${s}' (length ${s.length}) and k = ${k}`, function(){
