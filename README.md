@@ -18,9 +18,22 @@ npm install --save kmer.js
 
 ## Usage Example
 
+Loading the module and initiating a profile for a certain 'k'. An optional second argument string (e.g. 'ACTG') can be passed to specify the alphabet. Defaults to 'ACTG'
+
 ```javascript
->var kmers = require('kmer.js');
->var fourmers = kmers("hello world!", 4)
+>var k = 3;
+>var kmer = require('kmer.js')(k); // Alphabet defaults to 'ACTG'
+{
+  profile: { ... }, // A null profile for the given k and alphabet.
+  kmerArray: [Function: kmerArray], // (Class Method): Calculate the kmers for a string
+  streamingUpdate: [Function: streamingUpdate] // Update the profile with a filestream
+}
+```
+
+Calculate all substrings for an arbitrary string
+
+```javascript
+>var fourmers = kmer.kmerArray("hello world!", 4)
 [ 'hell',
 'ello',
 'llo ',
@@ -32,7 +45,37 @@ npm install --save kmer.js
 'rld!' ]
 ```
 
-## Develoment
+Train the profile with an arbitrary fasta filestream
+
+```javascript
+>var fasta = require('bionode-fasta'); // Bionode-fastq is also usable
+>var fs = require('fs');
+>fs.createReadStream(filepath, {encoding: "UTF-8"})
+ .pipe(fasta.obj())
+ .pipe(kmer.streamingUpdate())
+ .on('finish', function(){
+    console.log("Done");
+ });
+>console.log(kmer.profile)
+```
+
+Train the profile with a Amazon AWS S3 stream
+
+```javascript
+>var AWS = require('aws-sdk');
+>var s3 = new AWS.S3({apiVersion: '2006-03-01'});
+>var fasta = require('bionode-fasta')
+>var params = {Bucket: 'bucketname', Key: 'path/to/file.fasta'}
+>s3.getObject(params).createReadStream()
+ .pipe(fasta.obj())
+ .pipe(kmer.streamingUpdate())
+ .on('finish', function(){
+     console.log("Done");
+ });
+>console.log(kmer.profile);
+```
+
+## Development
 
 ```sh
 npm test # MochaJS specs
