@@ -1,6 +1,7 @@
 #!/bin/env node
 'use strict';
-const kmerArray = require('./../')(2);
+const Kmer      = require('./../');
+const kmerArray = new Kmer(2).kmerArray;
 const Benchmark = require('benchmark');
 var suite = new Benchmark.Suite
 

@@ -18,15 +18,20 @@ npm install --save kmer.js
 
 ## Usage Example
 
-Loading the module and initiating a profile for a certain 'k'. An optional second argument string (e.g. 'ACTG') can be passed to specify the alphabet. Defaults to 'ACTG'
+Loading the module and initiating a profile for a certain 'k'. An optional second argument string (e.g. 'ACTG') can be passed to specify the alphabet. Defaults to 'ACTG'. Protein alphabets can be used
 
 ```javascript
 >var k = 3;
->var kmer = require('kmer.js')(k); // Alphabet defaults to 'ACTG'
+>var Kmer = require('kmer.js');
+>var kmer = new Kmer(k); // Alphabet defaults to 'ACTG'
+>#var kmer = new Kmer(k, "GALMFWKQESPVICYHRNDT");
 {
-  profile: { ... }, // A null profile for the given k and alphabet.
-  kmerArray: [Function: kmerArray], // (Class Method): Calculate the kmers for a string
-  streamingUpdate: [Function: streamingUpdate] // Update the profile with a filestream
+  k: 2,
+  alphabet: 'ACGT',
+  notInAlphabet: /[^ACGT]/,
+  letterToBinary: { A: 0, C: 1, G: 2, T: 3 },
+  binaryToLetter: [ 'A', 'C', 'G', 'T' ],
+  profile: Uint32Array [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], // A null profile for the given k and alphabet.
 }
 ```
 
@@ -74,6 +79,24 @@ Train the profile with a Amazon AWS S3 stream
  });
 >console.log(kmer.profile);
 ```
+
+Get the count of a single kmer from the profile
+
+```javascript
+>let testKmer = "AAA" // Note that the length matches the value of k.
+>let testIndex = kmer.sequenceToBinary(testKmer);
+0
+>kmer.profile[testIndex]
+```
+
+Get the sequence from a given binary-encoded index
+
+```javascript
+>let testIndex = 0
+>kmer.binaryToSequence(testIndex);
+'AAA'
+```
+
 
 ## Development
 
