@@ -1,0 +1,10 @@
+{
+    "name": "KmerJS",
+    "description": "A javascript module and CLI for shredding sequences into k-mers.",
+    "version": "0.1.0",
+    "url": "https://matthewralston.github.io/kmer.js",
+    "options": {
+	"linkNatives": true,
+	"outdir": "./docs"
+    }
+}

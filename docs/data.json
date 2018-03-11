@@ -1,0 +1,416 @@
+{
+    "project": {
+        "name": "KmerJS",
+        "description": "A javascript module and CLI for shredding sequences into k-mers.",
+        "version": "0.1.0",
+        "url": "https://matthewralston.github.io/kmer.js"
+    },
+    "files": {
+        "kmer.js": {
+            "name": "kmer.js",
+            "modules": {
+                "KmerJS": 1
+            },
+            "classes": {
+                "Kmer": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {
+        "KmerJS": {
+            "name": "KmerJS",
+            "submodules": {},
+            "elements": {},
+            "classes": {
+                "Kmer": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "kmer.js",
+            "line": 15,
+            "description": "Kmer.js is a module for calculating kmer frequencies and sequence probabilities",
+            "itemtype": "main"
+        }
+    },
+    "classes": {
+        "Kmer": {
+            "name": "Kmer",
+            "shortname": "Kmer",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "KmerJS",
+            "namespace": "",
+            "file": "kmer.js",
+            "line": 15,
+            "description": "Kmer.js is a module for calculating kmer frequencies and sequence probabilities",
+            "is_constructor": 1
+        }
+    },
+    "elements": {},
+    "classitems": [
+        {
+            "file": "kmer.js",
+            "line": 23,
+            "description": "The constructor method for instantiation",
+            "itemtype": "method",
+            "name": "constructor",
+            "params": [
+                {
+                    "name": "k",
+                    "description": "A value of k to generate the profile and calculate stats with",
+                    "type": "Number"
+                },
+                {
+                    "name": "letters",
+                    "description": "A string of characters for the alphabet of the sequences. Defaults to \"ACGT\";",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If the number of letters is not > 1",
+                "type": "TypeError"
+            },
+            "example": [
+                "\n    Kmer = require('kmer.js')\n    sampleA = new Kmer(9, \"ACGT\");"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 47,
+            "description": "Choice of k used to instantiate, used throughout the instance methods",
+            "itemtype": "property",
+            "name": "k",
+            "type": "Number",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 54,
+            "description": "The 'alphabet' of sequence characters to use",
+            "itemtype": "property",
+            "name": "alphabet",
+            "type": "String",
+            "default": "\"ACGT\"",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 62,
+            "description": "A regular expression to match characters not belonging to the alphabet",
+            "itemtype": "property",
+            "name": "notInAlphabet",
+            "type": "RegExp",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 69,
+            "description": "A mapping of letters to their binary encodings (integer indices)",
+            "itemtype": "property",
+            "name": "letterToBinary",
+            "type": "Object",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 79,
+            "description": "A mapping of binary encoded sequences to their corresponding Strings",
+            "itemtype": "property",
+            "name": "binaryToLetter",
+            "type": "Array",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 86,
+            "description": "A profile of kmer counts",
+            "itemtype": "property",
+            "name": "profile",
+            "type": "Uint32Array",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 93,
+            "description": "A total of counts from an instantiated profile\nRelies on data being loaded through the streamingUpdate() method\nRecalculate after updating by running the TotalProfileCounts() method",
+            "itemtype": "property",
+            "name": "totalProfileCounts",
+            "type": "BigNumber",
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 108,
+            "description": "Returns a 32-bit int array of zeroes, given an alphabet and choice of k",
+            "itemtype": "method",
+            "name": "profileAsArray",
+            "params": [
+                {
+                    "name": "k",
+                    "description": "An integer value with which to generate substrings",
+                    "type": "Number"
+                },
+                {
+                    "name": "letters",
+                    "description": "An optional string of letters, effectively the 'alphabet'. Defaults to 'ACGT'",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If the number of letters is not > 1",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "Returns a typed array of length  : letters.length ^ k",
+                "type": "Uint32Array"
+            },
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 133,
+            "description": "Returns an array of all k-length substrings. Takes a string and a k in that order.",
+            "itemtype": "method",
+            "name": "kmerArray",
+            "params": [
+                {
+                    "name": "s",
+                    "description": "A string to slice into kmers",
+                    "type": "String"
+                },
+                {
+                    "name": "k",
+                    "description": "An integer length for all resulting substrings",
+                    "type": "Number"
+                }
+            ],
+            "throws": {
+                "description": "If the length of s < k",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "Returns an array of Strings, all of length k, and all substrings of s.",
+                "type": "Array<String>"
+            },
+            "example": [
+                "\n   >var k = 7\n   >var testString = \"AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG\"\n   >var allKmersFromTestString = kmer.kmerArray(testString, 9)"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 168,
+            "description": "Updates the profile by pure side-effect. No return value",
+            "itemtype": "method",
+            "name": "update",
+            "params": [
+                {
+                    "name": "seq",
+                    "description": "A String with letters matching the pre-specified alphabet",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If there are letters in seq that aren't in the sequence alphabet",
+                "type": "TypeError"
+            },
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 194,
+            "description": "This method streams sequence data to update the kmer profile by side-effect",
+            "itemtype": "method",
+            "name": "streamingUpdate",
+            "throws": {
+                "description": "If the input stream's objects don't have a .seq attribute",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "A through2 stream wrapper",
+                "type": "Through2"
+            },
+            "example": [
+                "\n    >var fasta = require('bionode-fasta'); // Bionode-fastq also\n    >var fs = require('fs');\n    >fs.createReadStream(\"/path/to/example.fasta\", {encoding: \"UTF-8\"})\n       .pipe(fasta.obj())\n       .pipe(kmer.streamingUpdate())\n       .on('finish', function(){\n           console.log(\"Done!\");\n       });\n    >console.log(kmer.profile)",
+                "\n    >var AWS = require('aws-sdk');\n    >var s3 = new AWS.S3({apiVersion: '2006-03-01'});\n    >var fasta = require('bionode-fasta');\n    >var params = {Bucket: 'bucketname', Key: 'path/to/example.fasta'}\n    >s3.getObject(params).createReadStream()\n       .pipe(fasta.obj())\n       .pipe(kmer.streamingUpdate())\n       .on('finish', function(){\n           console.log(\"Done!\");\n       });\n    >console.log(kmer.profile);"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 238,
+            "description": "Returns a binary representation/encoding of a biological sequence",
+            "itemtype": "method",
+            "name": "sequenceToBinary",
+            "params": [
+                {
+                    "name": "s",
+                    "description": "A biological sequence to convert into a binary integer",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If there are letters in seq that aren't in the sequence alphabet",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "Returns an integer encoding of a k-mer",
+                "type": "Number"
+            },
+            "example": [
+                "\n    >var testKmer = \"AAAAAAAAA\" // Length of testKmer matches our initial value of k, 9\n    >var testKmerIndex = kmer.sequenceToBinary(testKmer);\n    >console.log( kmer.profile[testIndex] );"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 265,
+            "description": "Returns a biological sequence from a binary encoding",
+            "itemtype": "method",
+            "name": "binaryToSequence",
+            "params": [
+                {
+                    "name": "x",
+                    "description": "An integer encoding of a biological sequence",
+                    "type": "Number"
+                }
+            ],
+            "throws": {
+                "description": "If x is a float",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "A biological sequence",
+                "type": "String"
+            },
+            "example": [
+                "\n    >var testKmerIndex = 0; // Analogous to sequenceToBinary() example\n    >kmer.binaryToSequence(testKmerIndex);\n    'AAAAAAAAA'"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 293,
+            "description": "Sums the counts for the whole profile. \nIt also updates the associated property .totalProfileCounts as a side-effect",
+            "itemtype": "method",
+            "name": "TotalProfileCounts",
+            "return": {
+                "description": "Returns a BigNumber.js sum of all counts from the profile array",
+                "type": "BigNumber"
+            },
+            "example": [
+                "\n    >// After a streaming update, the attribute .totalProfileCounts isn't always updated\n    >console.log( kmer.totalProfileCounts );\n    0\n    >kmer.TotalProfileCounts();\n    10300\n    >console.log( kmer.totalProfileCounts );\n    10300"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 314,
+            "description": "Calculates a frequency of a sequence in the profile",
+            "itemtype": "method",
+            "name": "frequency",
+            "params": [
+                {
+                    "name": "seq",
+                    "description": "A sequence to retrieve the relative count/frequency",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If seq is not a kmer (has a length of k)",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "The frequency (count/totalCounts) of the sequence from the profile",
+                "type": "BigNumber"
+            },
+            "example": [
+                "\n    >var testKmer = \"AAAAAAAAA\";\n    >var testKmerFrequency = kmer.frequency(testKmer); // Returns a BigNumber.js\n    >console.log( testKmerFrequency.toNumber() );\n    0.123457"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 335,
+            "description": "Calculates the transition probability of one sequence to the next in a Markov chain",
+            "itemtype": "method",
+            "name": "transitionProbability",
+            "params": [
+                {
+                    "name": "seq1",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "seq2",
+                    "description": "",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If seq2 is not a kmer (has a length of k)",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "The transition probability of seq1 to seq2",
+                "type": "BigNumber"
+            },
+            "example": [
+                "\n    >var testKmer1 = \"AAAAAAAAA\";\n    >var testKmer2 = \"AAAAAAAAT\";\n    >var transProbTK1toTK2 = kmer.transitionProbability(testKmer1, testKmer2);\n    >console.log( transProbTK1toTK2.toNumber() );\n    0.111048"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        },
+        {
+            "file": "kmer.js",
+            "line": 368,
+            "description": "Calculates the Markov chain probability of a sequence from its transition probabilities",
+            "itemtype": "method",
+            "name": "probabilityOfSequence",
+            "params": [
+                {
+                    "name": "seq",
+                    "description": "A biological sequence",
+                    "type": "String"
+                }
+            ],
+            "throws": {
+                "description": "If there are letters in seq that aren't in the sequence alphabet",
+                "type": "TypeError"
+            },
+            "return": {
+                "description": "Returns the Markov-chain probability of the input sequence",
+                "type": "BigNumber"
+            },
+            "example": [
+                "\n    >var testKmer = \"AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG\";\n    >var testKmerProb = kmer.probabilityOfSequence(testKmer);\n    >console.log( testKmerProb.toNumber() );\n    0.000033333888887777710"
+            ],
+            "class": "Kmer",
+            "module": "KmerJS"
+        }
+    ],
+    "warnings": []
+}

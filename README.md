@@ -24,7 +24,7 @@ Loading the module and initiating a profile for a certain 'k'. An optional secon
 >var k = 3;
 >var Kmer = require('kmer.js');
 >var kmer = new Kmer(k); // Alphabet defaults to 'ACTG'
->#var kmer = new Kmer(k, "GALMFWKQESPVICYHRNDT");
+>//var kmer = new Kmer(k, "GALMFWKQESPVICYHRNDT");
 {
   k: 2,
   alphabet: 'ACGT',
@@ -97,6 +97,10 @@ Get the sequence from a given binary-encoded index
 'AAA'
 ```
 
+## Documentation
+
+Check out the [Yuidoc documentation](https://matthewralston.github.io/kmer.js/docs), with examples and descriptions for all methods in the Kmer class.
+
 
 ## Development
 
@@ -129,6 +133,6 @@ Distributed under the GPL v3.0 license. See `LICENSE.txt` for the copy distribut
 [downloads-image]: https://img.shields.io/npm/dm/kmer.js.svg
 [downloads-url]: https://npmjs.org/package/kmer.js
 [travis-image]: https://img.shields.io/travis/MatthewRalston/kmer.js/master.svg?label=linux
-[travis-url]: https://travis-ci.org/MatthewRalston/kmer.js
+[travis-url]: https://travis-ci.com/MatthewRalston/kmer.js
 [coveralls-image]: https://img.shields.io/coveralls/MatthewRalston/kmer.js/master.svg
 [coveralls-url]: https://coveralls.io/r/MatthewRalston/kmer.js?branch=master

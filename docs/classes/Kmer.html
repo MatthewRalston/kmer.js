@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Kmer - KmerJS</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="KmerJS" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.1.0</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/Kmer.html">Kmer</a></li>
+                            </ul>
+                
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/KmerJS.html">KmerJS</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1>Kmer Class</h1>
+<div class="box meta">
+
+
+        <div class="foundat">
+            Defined in: <a href="../files/kmer.js.html#l15"><code>kmer.js:15</code></a>
+        </div>
+
+            Module: <a href="../modules/KmerJS.html">KmerJS</a>
+
+</div>
+
+
+<div class="box intro">
+    <p>Kmer.js is a module for calculating kmer frequencies and sequence probabilities</p>
+
+</div>
+
+    <div class="constructor">
+        <h2>Constructor</h2>
+<div id="method_Kmer" class="method item">
+    <h3 class="name"><code>Kmer</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l15"><code>kmer.js:15</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        
+    </div>
+
+
+
+
+</div>
+    </div>
+
+<div id="classdocs" class="tabview">
+    <ul class="api-class-tabs">
+        <li class="api-class-tab index"><a href="#index">Index</a></li>
+
+            <li class="api-class-tab methods"><a href="#methods">Methods</a></li>
+            <li class="api-class-tab properties"><a href="#properties">Properties</a></li>
+    </ul>
+
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            <h2 class="off-left">Item Index</h2>
+
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods">
+                            <li class="index-item method">
+                                <a href="#method_binaryToSequence">binaryToSequence</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_constructor">constructor</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_frequency">frequency</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_kmerArray">kmerArray</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_probabilityOfSequence">probabilityOfSequence</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_profileAsArray">profileAsArray</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_sequenceToBinary">sequenceToBinary</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_streamingUpdate">streamingUpdate</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_TotalProfileCounts">TotalProfileCounts</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_transitionProbability">transitionProbability</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_update">update</a>
+
+                            </li>
+                    </ul>
+                </div>
+
+                <div class="index-section properties">
+                    <h3>Properties</h3>
+
+                    <ul class="index-list properties">
+                            <li class="index-item property">
+                                <a href="#property_alphabet">alphabet</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_binaryToLetter">binaryToLetter</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_k">k</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_letterToBinary">letterToBinary</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_notInAlphabet">notInAlphabet</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_profile">profile</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_totalProfileCounts">totalProfileCounts</a>
+
+                            </li>
+                    </ul>
+                </div>
+
+
+        </div>
+
+            <div id="methods" class="api-class-tabpanel">
+                <h2 class="off-left">Methods</h2>
+
+<div id="method_binaryToSequence" class="method item">
+    <h3 class="name"><code>binaryToSequence</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>x</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l265"><code>kmer.js:265</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Returns a biological sequence from a binary encoding</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">x</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>
+
+
+                    <div class="param-description">
+                        <p>An integer encoding of a biological sequence</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>:
+                    <p>A biological sequence</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If x is a float</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;var testKmerIndex = 0; // Analogous to sequenceToBinary() example
+&gt;kmer.binaryToSequence(testKmerIndex);
+'AAAAAAAAA'</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_constructor" class="method item">
+    <h3 class="name"><code>constructor</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>k</code>
+                </li>
+                <li class="arg">
+                        <code>letters</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l23"><code>kmer.js:23</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>The constructor method for instantiation</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">k</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>
+
+
+                    <div class="param-description">
+                        <p>A value of k to generate the profile and calculate stats with</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">letters</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>A string of characters for the alphabet of the sequences. Defaults to &quot;ACGT&quot;;</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If the number of letters is not &gt; 1</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>Kmer = require('kmer.js')
+sampleA = new Kmer(9, &quot;ACGT&quot;);</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_frequency" class="method item">
+    <h3 class="name"><code>frequency</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>seq</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">BigNumber</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l314"><code>kmer.js:314</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Calculates a frequency of a sequence in the profile</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">seq</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>A sequence to retrieve the relative count/frequency</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">BigNumber</span>:
+                    <p>The frequency (count/totalCounts) of the sequence from the profile</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If seq is not a kmer (has a length of k)</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;var testKmer = &quot;AAAAAAAAA&quot;;
+&gt;var testKmerFrequency = kmer.frequency(testKmer); // Returns a BigNumber.js
+&gt;console.log( testKmerFrequency.toNumber() );
+0.123457</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_kmerArray" class="method item">
+    <h3 class="name"><code>kmerArray</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>s</code>
+                </li>
+                <li class="arg">
+                        <code>k</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Array<String></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l133"><code>kmer.js:133</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Returns an array of all k-length substrings. Takes a string and a k in that order.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">s</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>A string to slice into kmers</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">k</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>
+
+
+                    <div class="param-description">
+                        <p>An integer length for all resulting substrings</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Array<String></span>:
+                    <p>Returns an array of Strings, all of length k, and all substrings of s.</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If the length of s &lt; k</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <blockquote>
+<p>var k = 7
+var testString = &quot;AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG&quot;
+var allKmersFromTestString = kmer.kmerArray(testString, 9)</p>
+</blockquote>
+
+            </div>
+        </div>
+</div>
+<div id="method_probabilityOfSequence" class="method item">
+    <h3 class="name"><code>probabilityOfSequence</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>seq</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">BigNumber</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l368"><code>kmer.js:368</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Calculates the Markov chain probability of a sequence from its transition probabilities</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">seq</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>A biological sequence</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">BigNumber</span>:
+                    <p>Returns the Markov-chain probability of the input sequence</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If there are letters in seq that aren't in the sequence alphabet</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;var testKmer = &quot;AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG&quot;;
+&gt;var testKmerProb = kmer.probabilityOfSequence(testKmer);
+&gt;console.log( testKmerProb.toNumber() );
+0.000033333888887777710</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_profileAsArray" class="method item">
+    <h3 class="name"><code>profileAsArray</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>k</code>
+                </li>
+                <li class="arg">
+                        <code>letters</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array" class="crosslink external" target="_blank">Uint32Array</a></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l108"><code>kmer.js:108</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Returns a 32-bit int array of zeroes, given an alphabet and choice of k</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">k</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>
+
+
+                    <div class="param-description">
+                        <p>An integer value with which to generate substrings</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">letters</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>An optional string of letters, effectively the 'alphabet'. Defaults to 'ACGT'</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array" class="crosslink external" target="_blank">Uint32Array</a></span>:
+                    <p>Returns a typed array of length  : letters.length ^ k</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If the number of letters is not &gt; 1</p>
+
+            </div>
+        </div>
+
+</div>
+<div id="method_sequenceToBinary" class="method item">
+    <h3 class="name"><code>sequenceToBinary</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>s</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l238"><code>kmer.js:238</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Returns a binary representation/encoding of a biological sequence</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">s</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>A biological sequence to convert into a binary integer</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>:
+                    <p>Returns an integer encoding of a k-mer</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If there are letters in seq that aren't in the sequence alphabet</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;var testKmer = &quot;AAAAAAAAA&quot; // Length of testKmer matches our initial value of k, 9
+&gt;var testKmerIndex = kmer.sequenceToBinary(testKmer);
+&gt;console.log( kmer.profile[testIndex] );</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_streamingUpdate" class="method item">
+    <h3 class="name"><code>streamingUpdate</code></h3>
+
+        <span class="paren">()</span>
+
+        <span class="returns-inline">
+            <span class="type">Through2</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l194"><code>kmer.js:194</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>This method streams sequence data to update the kmer profile by side-effect</p>
+
+    </div>
+
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Through2</span>:
+                    <p>A through2 stream wrapper</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If the input stream's objects don't have a .seq attribute</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;var fasta = require('bionode-fasta'); // Bionode-fastq also
+&gt;var fs = require('fs');
+&gt;fs.createReadStream(&quot;/path/to/example.fasta&quot;, {encoding: &quot;UTF-8&quot;})
+   .pipe(fasta.obj())
+   .pipe(kmer.streamingUpdate())
+   .on('finish', function(){
+       console.log(&quot;Done!&quot;);
+   });
+&gt;console.log(kmer.profile)</code></pre>
+<pre class="code prettyprint"><code>&gt;var AWS = require('aws-sdk');
+&gt;var s3 = new AWS.S3({apiVersion: '2006-03-01'});
+&gt;var fasta = require('bionode-fasta');
+&gt;var params = {Bucket: 'bucketname', Key: 'path/to/example.fasta'}
+&gt;s3.getObject(params).createReadStream()
+   .pipe(fasta.obj())
+   .pipe(kmer.streamingUpdate())
+   .on('finish', function(){
+       console.log(&quot;Done!&quot;);
+   });
+&gt;console.log(kmer.profile);</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_TotalProfileCounts" class="method item">
+    <h3 class="name"><code>TotalProfileCounts</code></h3>
+
+        <span class="paren">()</span>
+
+        <span class="returns-inline">
+            <span class="type">BigNumber</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l293"><code>kmer.js:293</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Sums the counts for the whole profile.
+It also updates the associated property .totalProfileCounts as a side-effect</p>
+
+    </div>
+
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">BigNumber</span>:
+                    <p>Returns a BigNumber.js sum of all counts from the profile array</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;// After a streaming update, the attribute .totalProfileCounts isn't always updated
+&gt;console.log( kmer.totalProfileCounts );
+0
+&gt;kmer.TotalProfileCounts();
+10300
+&gt;console.log( kmer.totalProfileCounts );
+10300</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_transitionProbability" class="method item">
+    <h3 class="name"><code>transitionProbability</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>seq1</code>
+                </li>
+                <li class="arg">
+                        <code>seq2</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">BigNumber</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l335"><code>kmer.js:335</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Calculates the transition probability of one sequence to the next in a Markov chain</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">seq1</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">seq2</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">BigNumber</span>:
+                    <p>The transition probability of seq1 to seq2</p>
+
+            </div>
+        </div>
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If seq2 is not a kmer (has a length of k)</p>
+
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>&gt;var testKmer1 = &quot;AAAAAAAAA&quot;;
+&gt;var testKmer2 = &quot;AAAAAAAAT&quot;;
+&gt;var transProbTK1toTK2 = kmer.transitionProbability(testKmer1, testKmer2);
+&gt;console.log( transProbTK1toTK2.toNumber() );
+0.111048</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_update" class="method item">
+    <h3 class="name"><code>update</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>seq</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l168"><code>kmer.js:168</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Updates the profile by pure side-effect. No return value</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">seq</code>
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+                    <div class="param-description">
+                        <p>A String with letters matching the pre-specified alphabet</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="throws">
+            <h4>Throws:</h4>
+
+            <div class="throws-description">
+                        <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError" class="crosslink external" target="_blank">TypeError</a></span>:
+                    <p>If there are letters in seq that aren't in the sequence alphabet</p>
+
+            </div>
+        </div>
+
+</div>
+            </div>
+
+            <div id="properties" class="api-class-tabpanel">
+                <h2 class="off-left">Properties</h2>
+
+<div id="property_alphabet" class="property item">
+    <h3 class="name"><code>alphabet</code></h3>
+    <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l54"><code>kmer.js:54</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>The 'alphabet' of sequence characters to use</p>
+
+    </div>
+
+        <p><strong>Default:</strong> &quot;ACGT&quot;</p>
+
+
+</div>
+<div id="property_binaryToLetter" class="property item">
+    <h3 class="name"><code>binaryToLetter</code></h3>
+    <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="crosslink external" target="_blank">Array</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l79"><code>kmer.js:79</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>A mapping of binary encoded sequences to their corresponding Strings</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_k" class="property item">
+    <h3 class="name"><code>k</code></h3>
+    <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l47"><code>kmer.js:47</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Choice of k used to instantiate, used throughout the instance methods</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_letterToBinary" class="property item">
+    <h3 class="name"><code>letterToBinary</code></h3>
+    <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l69"><code>kmer.js:69</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>A mapping of letters to their binary encodings (integer indices)</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_notInAlphabet" class="property item">
+    <h3 class="name"><code>notInAlphabet</code></h3>
+    <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp" class="crosslink external" target="_blank">RegExp</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l62"><code>kmer.js:62</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>A regular expression to match characters not belonging to the alphabet</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_profile" class="property item">
+    <h3 class="name"><code>profile</code></h3>
+    <span class="type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array" class="crosslink external" target="_blank">Uint32Array</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l86"><code>kmer.js:86</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>A profile of kmer counts</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_totalProfileCounts" class="property item">
+    <h3 class="name"><code>totalProfileCounts</code></h3>
+    <span class="type">BigNumber</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/kmer.js.html#l93"><code>kmer.js:93</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>A total of counts from an instantiated profile
+Relies on data being loaded through the streamingUpdate() method
+Recalculate after updating by running the TotalProfileCounts() method</p>
+
+    </div>
+
+
+
+</div>
+            </div>
+
+
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

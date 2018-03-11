@@ -7,7 +7,7 @@ var suite = new Benchmark.Suite
 
 
 
-function constantN(k){
+function kmerArrayConstantN(k){
     const s = "helloworld";
     for (var i = 1; i < s.length; i++){
 	suite.add(`kmers() with string 'helloworld' (length 10) and k = ${i}`, function(){
@@ -17,7 +17,7 @@ function constantN(k){
     return suite;
 };
 
-function constantK(){
+function kmerArrayConstantK(){
     var min = 10;
     var max = 100;
     for (var i = min; i < max; i++){
@@ -27,8 +27,10 @@ function constantK(){
 	    kmerArray(s, k);
 	});
     }
-    return suite
+    return suite;
 }
+
+
 
 suite.on("cycle", function(event){
     console.log(String(event.target));
@@ -37,5 +39,6 @@ suite.on("cycle", function(event){
 });
 
 
-constantN(3).run();
-constantK().run();
+kmerArrayConstantN(3).run();
+kmerArrayConstantK().run();
+

@@ -10,6 +10,7 @@ const through2 = require("through2");
 const fs = require("fs");
 const fasta = require("bionode-fasta");
 const rewire = require("rewire");
+const BigNumber = require("bignumber.js");
 
 // Module
 var kmerConstructor = rewire("./../");
@@ -566,9 +567,304 @@ describe("kmerJS", function(){
 		expect(kmer.profileAsArray(k)).to.be.an.instanceof(Uint32Array);
 	    });
 	    it("has length equal to 4^k", function(){
-		let letters = "ACGT"; // 4 letters
+		var letters = "ACGT"; // 4 letters
 		expect(kmer.profileAsArray(2, letters)).to.have.lengthOf(Math.pow(letters.length, 2));
 		expect(kmer.profileAsArray(3, letters)).to.have.lengthOf(Math.pow(letters.length, 3));
+	    });
+	});
+    });
+    describe("TotalProfileCounts()", function(){
+	var k;
+	var kmer;
+	var test;
+	var expectedProfile; 
+
+	before(function(done){
+	    k = 2;
+	    expectedProfile = new Uint32Array([604,
+					       609,
+					       657,
+					       508,
+					       725,
+					       693,
+					       712,
+					       615,
+					       832,
+					       872,
+					       952,
+					       523,
+					       215,
+					       571,
+					       860,
+					       352]);
+	    kmer = new kmerConstructor(k);
+	    testFasta = "./test/data/hexokinase-small.fa";
+	    fs.createReadStream(testFasta, {encoding: "UTF-8"})
+		.pipe(fasta.obj())
+		.pipe(kmer.streamingUpdate())
+	        .on('finish', done);
+	});
+
+	it("returns a BigNumber", function(){
+	    expect(kmer.TotalProfileCounts()).to.be.an.instanceof(BigNumber);
+	});
+	it("returns a sum of profile counts", function(){
+	    var expectedSum = expectedProfile.reduce((a, b) => a + b);
+	    expect(kmer.TotalProfileCounts().toNumber()).to.equal(expectedSum);
+	});
+    });
+    describe("frequency()", function(){
+	var k;
+	var kmer;
+	var expectedProfile;
+	before(function(){
+	    k = 2;
+	    expectedProfile = new Uint32Array([604,
+					       609,
+					       657,
+					       508,
+					       725,
+					       693,
+					       712,
+					       615,
+					       832,
+					       872,
+					       952,
+					       523,
+					       215,
+					       571,
+					       860,
+					       352]);
+	    kmer = new kmerConstructor(k);
+	    kmer.profile = expectedProfile;
+	    kmer.TotalProfileCounts();
+	});
+
+	describe("when run with improper arguments", function(){
+	    it("throws a TypeError when run with a boolean", function(){
+		expect(function(){
+		    kmer.frequency(undefined);
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with a boolean", function(){
+		expect(function(){
+		    kmer.frequency(true);
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with an Array", function(){
+		expect(function(){
+		    kmer.frequency([]);
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with an Object", function(){
+		expect(function(){
+		    kmer.frequency({});
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with a String with length 1", function(){
+		expect(function(){
+		    kmer.frequency("A");
+		}).to.throw(TypeError, `takes a String with length ${k} as its only positional argument`);
+		expect(function(){
+		    kmer.frequency("ATA");
+		}).to.throw(TypeError, `takes a String with length ${k} as its only positional argument`);
+	    });
+	});
+	describe("when run with proper arguments", function(){
+	    it("returns a BigNumber", function(){
+		expect(kmer.frequency("AA")).to.be.an.instanceof(BigNumber);
+	    });
+	    it("returns the correct frequency", function(){
+		expect(kmer.frequency("AA").toNumber()).to.equal(604/10300);
+	    });
+	});
+    });
+    describe("transitionProbability()", function(){
+	var k;
+	var kmer;
+	var expectedProfile;
+	var seq1;
+	var seq2;
+	before(function(){
+	    k = 2;
+	    expectedProfile = new Uint32Array([604,
+					       609,
+					       657,
+					       508,
+					       725,
+					       693,
+					       712,
+					       615,
+					       832,
+					       872,
+					       952,
+					       523,
+					       215,
+					       571,
+					       860,
+					       352]);
+	    kmer = new kmerConstructor(k);
+	    kmer.profile = expectedProfile;
+	    seq1 = "AA";
+	    seq2 = "AT";
+	});
+	describe("when run with improper arguments", function(){
+	    describe("invalid first positional argument", function(){
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.transitionProbability(undefined, seq2);
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.transitionProbability(true, seq2);
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run with an Array", function(){
+		    expect(function(){
+			kmer.transitionProbability([], seq2);
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run with an Object", function(){
+		    expect(function(){
+			kmer.transitionProbability({}, seq2);
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run with a String with length != k", function(){
+		    expect(function(){
+			return kmer.transitionProbability("A", seq2);
+		    }).to.throw(TypeError, `takes a sequence of length ${k} as its first positional argument`);
+		    expect(function(){
+			return kmer.transitionProbability("ATA", seq2);
+		    }).to.throw(TypeError, `takes a sequence of length ${k} as its first positional argument`);
+		});
+	    });
+	    describe("invalid second positional argument", function(){
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.transitionProbability(seq1, undefined);
+		    }).to.throw(TypeError, "takes a String as its second positional argument");
+		});
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.transitionProbability(seq1, true);
+		    }).to.throw(TypeError, "takes a String as its second positional argument");
+		});
+		it("throws a TypeError when run with an Array", function(){
+		    expect(function(){
+			kmer.transitionProbability(seq1, []);
+		    }).to.throw(TypeError, "takes a String as its second positional argument");
+		});
+		it("throws a TypeError when run with an Object", function(){
+		    expect(function(){
+			kmer.transitionProbability(seq1, {});
+		    }).to.throw(TypeError, "takes a String as its second positional argument");
+		});
+		it("throws a TypeError when run with a String whose length != k", function(){
+		    expect(function(){
+			return kmer.transitionProbability(seq1, "A");
+		    }).to.throw(TypeError, `takes a sequence of length ${k} as its second positional argument`);
+		    expect(function(){
+			return kmer.transitionProbability(seq1, "ATA");
+		    }).to.throw(TypeError, `takes a sequence of length ${k} as its second positional argument`);
+		});
+	    });
+	});
+	describe("when run with proper arguments", function(){
+	    it("returns a BigNumber", function(){
+		expect(kmer.transitionProbability("AA", "AT")).to.be.an.instanceof(BigNumber);
+	    });
+	    it("throws a TypeError when the suffix of seq1 is not equal to the suffix of seq2", function(){
+		expect(kmer.transitionProbability("AA", "TT").toNumber()).to.equal(0);
+	    });
+	    it("returns the expected transition probability for a sequence", function(){
+		var prefixProbs = [ 0.058640776699029125, // AA
+				    0.05912621359223301, // AC
+				    0.0637864077669903, // AG
+				    0.04932038834951456 ]; // AT
+		var expectedTransitionProbability = prefixProbs[3]/prefixProbs.reduce((a,b) => a+b);
+		expect(kmer.transitionProbability("AA", "AT").toNumber()).to.equal(expectedTransitionProbability);
+	    });
+	});
+    });
+    describe("probabilityOfSequence()", function(){
+	var k;
+	var kmer;
+	var expectedProfile;
+	var seq1;
+	var seq2;
+	var alphabet;
+	before(function(){
+	    k = 2;
+	    alphabet = "ACGT";
+	    expectedProfile = new Uint32Array([604,
+					       609,
+					       657,
+					       508,
+					       725,
+					       693,
+					       712,
+					       615,
+					       832,
+					       872,
+					       952,
+					       523,
+					       215,
+					       571,
+					       860,
+					       352]);
+	    kmer = new kmerConstructor(k);
+	    kmer.profile = expectedProfile;
+	    kmer.TotalProfileCounts();
+	    seq1 = "AA";
+	    seq2 = "AT";
+	});
+	describe("when run with an improper argument", function(){
+	    it("throws a TypeError when run with a boolean", function(){
+		expect(function(){
+		    kmer.probabilityOfSequence(undefined);
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with a boolean", function(){
+		expect(function(){
+		    kmer.probabilityOfSequence(true);
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with an Array", function(){
+		expect(function(){
+		    kmer.probabilityOfSequence([]);
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with an Object", function(){
+		expect(function(){
+		    kmer.probabilityOfSequence({});
+		}).to.throw(TypeError, "takes a String as its only positional argument");
+	    });
+	    it("throws a TypeError when run with a String with length != k", function(){
+		expect(function(){
+		    kmer.probabilityOfSequence("A");
+		}).to.throw(TypeError, "takes a String with length greater than " + k + " as its only positional argument");
+		expect(function(){
+		    kmer.probabilityOfSequence("AA");
+		}).to.throw(TypeError, "takes a String with length greater than " + k + " as its only positional argument");
+	    });
+	    it("throws a TypeError when run a String with letters not in the residue alphabet", function(){
+		expect(function(){
+		    kmer.probabilityOfSequence("helloworld");
+		}).to.throw(TypeError, "takes a String with letters from the alphabet '" + alphabet + "'" );
+	    });
+	});
+	describe("when run with proper arguments", function(){
+	    it("returns a BigNumber", function(){
+		expect(kmer.probabilityOfSequence("AAT")).to.be.an.instanceof(BigNumber);
+	    });
+	    it("returns the product of transition probabilities of the kmers", function(){
+		var prefixProbs = [ 0.058640776699029125, // AA
+				    0.05912621359223301, // AC
+				    0.0637864077669903, // AG
+				    0.04932038834951456 ]; // AT
+		var expectedTransitionProbability = prefixProbs[3]/prefixProbs.reduce((a,b) => a+b);
+		expect(kmer.probabilityOfSequence("AAT").toNumber()).to.equal(expectedTransitionProbability);
 	    });
 	});
     });
