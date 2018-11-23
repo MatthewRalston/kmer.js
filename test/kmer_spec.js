@@ -124,6 +124,9 @@ describe("kmerJS", function(){
 	    it("has an 'kmerArray' attribute", function(){
 		expect(kmer).to.have.property('kmerArray');
 	    });
+	    it("has an 'kmerFrequencies' attribute", function(){
+		expect(kmer).to.have.property('kmerFrequencies');
+	    });
 	    it("has an 'streamingUpdate' attribute", function(){
 		expect(kmer).to.have.property('streamingUpdate');
 	    });
@@ -249,6 +252,114 @@ describe("kmerJS", function(){
 		    var maxLength = theoreticalMaximumSimple(s.length, i);
 		    expect(kmer.kmerArray(s, i)).to.have.lengthOf(maxLength);
 		}
+	    });
+	});
+    });
+    describe("kmerFrequencies()", function(){
+	var k;
+	var kmer;
+	before(function(done){
+	    k = 3
+	    kmer = new kmerConstructor(k);
+	    done();
+	});
+	describe("when run with improper arguments", function(){
+	    describe("invalid first positional argument", function(){
+		it("throws a TypeError when run on an undefined", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(undefined, 4)
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run on a number", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(1, 4)
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run on a boolean", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(true, 4)
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run on an Array", function(){
+		    expect(function(){
+			kmer.kmerFrequencies([], 4)
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run on an object", function(){
+		    expect(function(){
+			kmer.kmerFrequencies({}, 4)
+		    }).to.throw(TypeError, "takes a String as its first positional argument");
+		});
+		it("throws a TypeError when run on a String whose length is < k", function(){
+		    expect(function(){
+			kmer.kmerFrequencies("hello", 6)
+		    }).to.throw(TypeError, "takes a String whose length > k as its first positional argument");
+		});
+	    });
+	    describe("invalid second positional argument", function(){
+		var s;
+		before(function(){
+		    s = "helloworld";
+		});
+		it("throws a TypeError when run with undefined", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(s, undefined);
+		    }).to.throw(TypeError, "takes an integer as its second and final positional argument");;
+		});
+		it("throws a TypeError when run with a String", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(s, '');
+		    }).to.throw(TypeError, "takes an integer as its second and final positional argument");
+		});
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(s, true);
+		    }).to.throw(TypeError, "takes an integer as its second and final positional argument");
+		});
+		it("throws a TypeError when run with an Array", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(s, []);
+		    }).to.throw(TypeError, "takes an integer as its second and final positional argument");
+		});
+		it("throws a TypeError when run with an Object", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(s, {});
+		    }).to.throw(TypeError, "takes an integer as its second and final positional argument");
+		});
+		it("throws a TypeError when run with a floating point number", function(){
+		    expect(function(){
+			kmer.kmerFrequencies(s, 4.4);
+		    }).to.throw(TypeError, "This was a float");
+		});
+	    });
+	});
+	describe("when run with proper arguments", function(){
+	    var s;
+	    var substrings;
+	    function theoreticalMaximumSimple(n, k){
+		return n - k + 1;
+	    }
+
+	    before(function(){
+		alphabetLength = 4;
+		s = "ACTGACTGACTG";
+		frequencies = new Uint32Array([0, 3, 0, 0, 0, 0, 0, 3, 2, 0, 0, 0, 0, 0, 3, 0]);
+
+	    });
+	    it("returns an Uint32Array", function(){
+		expect(kmer.kmerFrequencies(s, 2)).to.be.an.instanceof(Uint32Array);
+	    });
+	    it("returns the theoretical maximum (n!/(n-k)! = n-k+1) substrings' frequencies", function(){
+		// Test all cases where 0 < k < n and prove that the theoretically correct number of substrings is calculated.
+		for (i=1; i < s.length; i++){
+		    var maxProfileLength = Math.pow(4, i);
+		    expect(kmer.kmerFrequencies(s, i)).to.have.lengthOf(maxProfileLength);
+		}
+	    });
+	    describe("when k is 2", function(){
+		it("returns the correct frequencies for the string", function(){
+		    expect(kmer.kmerFrequencies(s, 2)).to.deep.equal(frequencies);
+		});
 	    });
 	});
     });

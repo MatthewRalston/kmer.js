@@ -148,10 +148,10 @@ class Kmer {
      *     >var allKmersFromTestString = kmer.kmerArray(testString, 9)
      */
     kmerArray(s, k){
-	if (!Type.is(s, String)) throw TypeError("kmer.kmerArray takes a String as its first positional argument");
-	else if (!Type.is(k, Number)) throw TypeError("kmer.kmerArray takes an integer as its second and final positional argument");
-	else if (!isNaN(k) && k.toString().indexOf('.') != -1) throw TypeError("kmer.kmerArray takes an integer as its second and final positional argument. This was a float");
-	else if (s.length < k) throw TypeError("kmer.kmerArray takes a String whose length > k as its first positional argument");
+      if (!Type.is(s, String)) throw TypeError("kmer.kmerArray takes a String as its first positional argument");
+      else if (!Type.is(k, Number)) throw TypeError("kmer.kmerArray takes an integer as its second and final positional argument");
+      else if (!isNaN(k) && k.toString().indexOf('.') != -1) throw TypeError("kmer.kmerArray takes an integer as its second and final positional argument. This was a float");
+      else if (s.length < k) throw TypeError("kmer.kmerArray takes a String whose length > k as its first positional argument");
 	else {
 	    return Array(s.length).fill(undefined).map(function(_, i){
 		let r=s.substring(i, i+k);
@@ -164,7 +164,42 @@ class Kmer {
 	}
     };
 
-    
+
+    /**
+     *  Returns an array of frequencies of k-length substrings. Takes a string and a k in that order.
+     * 
+     * @method kmerFrequencies
+     * @param {String} s A string to slice into kmers
+     * @param {Number} k An integer length for all resulting substrings
+     * @throws {TypeError} If s is not a String
+     * @throws {TypeError} If k is not a Number
+     * @throws {TypeError} If k is a float
+     * @throws {TypeError} If the length of s < k
+     * @throws {TypeError} If the letters of s aren't in the alphabet
+     * @return {Array<String>} Returns an array of Strings, all of length k, and all substrings of s.
+     * 
+     * @example
+     *     >var k = 7
+     *     >var testString = "AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG"
+     *     >var kmerProfileFromTestString = kmer.kmerFrequencies(testString, 9)
+     */
+    kmerFrequencies(s, k){
+	if (!Type.is(s, String)) throw TypeError("kmer.kmerFrequencies takes a String as its first positional argument");
+	else if (!Type.is(k, Number)) throw TypeError("kmer.kmerFrequencies takes an integer as its second and final positional argument");
+	else if (!isNaN(k) && k.toString().indexOf('.') != -1) throw TypeError("kmer.kmerFrequencies takes an integer as its second and final positional argument. This was a float");
+	else if (s.length < k) throw TypeError("kmer.kmerFrequencies takes a String whose length > k as its first positional argument");
+	else if (s.match(this.notInAlphabet)) throw TypeError(`kmer.kmerFrequencies takes a String with letters from the alphabet '${this.alphabet}'`);
+	else {
+	    let substrings = this.kmerArray(s, k);
+	    var freqs = new Uint32Array(Math.pow(this.alphabet.length, k)).fill(0);
+	    while (substrings.length > 0) {
+		freqs[this.sequenceToBinary(substrings.pop())] += 1;
+            }
+            return freqs;
+	}
+    };
+
+  
     /**
      * Updates the profile by pure side-effect. No return value
      *
@@ -226,12 +261,12 @@ class Kmer {
 	var update = this.update;
 	var thisArg = this;
 	return through2.obj(function(data, enc, callback){
-	    if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
-	    else if (! ("seq" in data && Type.is(data.seq, String))) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
-	    else {
-		update(data.seq, thisArg);
-		callback();
-	    }
+	  if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
+	  else if (! ("seq" in data && Type.is(data.seq, String))) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
+	  else {
+	    update(data.seq, thisArg);
+	    callback();
+	  }
 	});
     }
 
