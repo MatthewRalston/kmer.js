@@ -97,6 +97,18 @@ Get the sequence from a given binary-encoded index
 'AAA'
 ```
 
+Get the markov chain probability of a sequence, where L<sub>x</sub> is the length of the input sequence `x`, and p<sub>ij</sub> is the transition probability of the ith to jth kmer.
+
+![](docs/assets/img/markov_chain_probability.gif)
+
+![](docs/assets/img/transition_probability.gif)
+
+```
+>let x = "ACTGACTTACGGATTGCATGACAT"
+>p = kmer.probabilityOfSequence(x)
+```
+
+
 ## Documentation
 
 Check out the [Yuidoc documentation](https://matthewralston.github.io/kmer.js/docs), with examples and descriptions for all methods in the Kmer class.

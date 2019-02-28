@@ -98,7 +98,8 @@ class Kmer {
 	 * @property totalProfileCounts
 	 * @type BigNumber
 	 */
-	this.totalProfileCounts = this.TotalProfileCounts();
+        this.totalProfileCounts = this.TotalProfileCounts();
+      
 	// Necessary enforced binding of context because... through2 changes scope?
 	this.update = this.Update.bind(this);
 
@@ -430,6 +431,41 @@ class Kmer {
 	    }
 	    return p;
 
+	}
+    }
+
+    /*
+     * Calculates the Euclidean similarity of two un-normalized profiles
+     * Converts each count to a BigNum frequency temporarily to calculate the euclidean distance
+     * 
+     * @method euclidean
+     * @param {Uint32Array} a A kmer profile in frequency form
+     * @param {Uint32Array} b A kmer profile in frequency form
+     * @throws {TypeError} If a is not a Uint32Array
+     * @throws {TypeError} If b is not a Uint32Array
+     * @throws {TypeError} If the lengths of a and b are not the same
+     * @return {BigNumber} Returns the Euclidean distance of the profiles as a BigNumber.js
+     * 
+     * @example
+     *     >var distance = kmer.euclidean(prof1, prof2);
+     *     >console.log( testKmerProb.toNumber() );
+     *     0.000033333888887777710
+
+     */
+    euclidean(a, b){
+	if (!Type.is(a, Uint32Array)) throw TypeError("kmer.euclidean takes a Uint32Array as its first positional argument");
+	else if (!Type.is(b, Uint32Array)) throw TypeError("kmer.euclidean takes a Uint32Array as its second positional argument");
+	else if (a.length != b.length) throw TypeError("kmer.euclidean requires both Uint32Arrays to have equal length");
+	else {
+	    let totA = 	a.reduce((x, y) => x + y);
+	    let totB = b.reduce((x, y) => x + y);
+	    return Math.sqrt(a.map(function(x, i) {
+
+		return BigNumber(x).minus(BigNumber(b[i])).pow(2);
+	    }).reduce(function(x, y){
+	      //return x.plus(y);
+	      return x+y;
+	    }))
 	}
     }
 }
