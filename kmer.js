@@ -262,8 +262,11 @@ class Kmer {
 	var update = this.update;
 	var thisArg = this;
 	return through2.obj(function(data, enc, callback){
-	  if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
-	  else if (! ("seq" in data && Type.is(data.seq, String))) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
+	    if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
+	    else if (!data.hasOwnProperty("seq") && !Type.is(data.seq, String)) {
+		console.log(data);
+		throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
+	    }
 	  else {
 	    update(data.seq, thisArg);
 	    callback();
@@ -277,6 +280,7 @@ class Kmer {
      * @method sequenceToBinary
      * @param {String} s A biological sequence to convert into a binary integer
      * @throws {TypeError} If s is not a String
+     * @throws {TypeError} If length of s is not k
      * @throws {TypeError} If there are letters in seq that aren't in the sequence alphabet
      * @return {Number} Returns an integer encoding of a k-mer
      * 
@@ -287,6 +291,7 @@ class Kmer {
      */
     sequenceToBinary(s){
 	if (!Type.is(s, String)) throw TypeError("kmer.sequenceToBinary takes a String as its only positional argument");
+	else if (s.length != this.k) throw TypeError("kmer.sequenceToBinary takes a String with length equal to k as its only positional argument");
 	else if (s.match(this.notInAlphabet)) throw TypeError("kmer.sequenceToBinary takes a String with letters in the specified alphabet as its only positional argument");
 	else {
 	    var result = 0x00;
@@ -435,12 +440,12 @@ class Kmer {
     }
 
     /*
-     * Calculates the Euclidean similarity of two un-normalized profiles
+     * Calculates the Euclidean similarity of unit/normalized vectors from 2 count profiles
      * Converts each count to a BigNum frequency temporarily to calculate the euclidean distance
      * 
      * @method euclidean
-     * @param {Uint32Array} a A kmer profile in frequency form
-     * @param {Uint32Array} b A kmer profile in frequency form
+     * @param {Uint32Array} a A kmer profile of integer counts
+     * @param {Uint32Array} b A kmer profile of integer counts
      * @throws {TypeError} If a is not a Uint32Array
      * @throws {TypeError} If b is not a Uint32Array
      * @throws {TypeError} If the lengths of a and b are not the same
@@ -452,22 +457,75 @@ class Kmer {
      *     0.000033333888887777710
 
      */
-    euclidean(a, b){
-	if (!Type.is(a, Uint32Array)) throw TypeError("kmer.euclidean takes a Uint32Array as its first positional argument");
-	else if (!Type.is(b, Uint32Array)) throw TypeError("kmer.euclidean takes a Uint32Array as its second positional argument");
-	else if (a.length != b.length) throw TypeError("kmer.euclidean requires both Uint32Arrays to have equal length");
+    euclidean(A, B){
+	if (!Type.is(A, Uint32Array)) throw TypeError("kmer.euclidean takes a Uint32Array as its first positional argument");
+	else if (!Type.is(B, Uint32Array)) throw TypeError("kmer.euclidean takes a Uint32Array as its second positional argument");
+	else if (A.length != B.length) throw TypeError("kmer.euclidean requires both Uint32Arrays to have equal length");
 	else {
-	    let totA = 	a.reduce((x, y) => x + y);
-	    let totB = b.reduce((x, y) => x + y);
-	    return Math.sqrt(a.map(function(x, i) {
+	    //let totA = 	a.reduce((x, y) => x + y);
+	    let normA = Math.sqrt(A.map((x) => x*x).reduce((x,y) => x+y));
+	    // let normalizedA = Array.from(A).map((x) => x/normA);
+	    //let totB = b.reduce((x, y) => x + y);
+	    let normB = Math.sqrt(B.map((x) => x*x).reduce((x,y) => x+y));
+	    // let normalizedB = Array.from(B).map((x) => x/normB);
+	    // console.log("A:", A)
+	    // console.log("B:", B)
+	    // console.log("Norm of A:", normA)
+	    // console.log("Norm of B:", normB)
+	    // console.log("Normalized A:", normalizedA);
+	    // console.log("Normalized B:", normalizedB);
 
-		return BigNumber(x).minus(BigNumber(b[i])).pow(2);
-	    }).reduce(function(x, y){
-	      //return x.plus(y);
-	      return x+y;
-	    }))
+	    
+	    let final = Array.from(A).map(function(a, i) {
+	    	// Divide by the magnitude/norm of each vector to make them unit vectors
+		// let normCoordA=a/normA;
+		// console.log("a / normA = " + a + "/" + normA + " = " + normCoordA);
+		// console.log(BigNumber(normCoordA))
+	    	return new BigNumber(a/normA).minus(BigNumber(B[i]/normB)).pow(2);
+	    }).reduce((x,y) => x.plus(y));
+
+	    return Number(Math.sqrt(final.toNumber()).toFixed(8));
 	}
     }
+
+
+
+    
+    /*
+     * Calculates the Pearson correlation similarity of two un-normalized profiles
+     * 
+     * @method correlation
+     * @param {Uint32Array} A, a kmer profile of integer counts
+     * @param {Uint32Array} B, a kmer profile of integer counts
+     * @throws {TypeError} If A is not a Uint32Array
+     * @throws {TypeError} If B is not a Uint32Array
+     * @throws {TypeError} If the lengths of A and B are not the same
+     * @return {BigNumber} Returns the Pearson correlation distance of the profiles as a BigNumber.js
+     * 
+     * @example
+     *     >var distance = kmer.correlation(prof1, prof2);
+     *     >console.log( testKmerProb.toNumber() );
+     *     0.000033333888887777710
+
+     */
+    correlation(A, B){
+	if (!Type.is(A, Uint32Array)) throw TypeError("kmer.correlation takes a Uint32Array as its first positional argument");
+	else if (!Type.is(B, Uint32Array)) throw TypeError("kmer.correlation takes a Uint32Array as its second positional argument");
+	else if (A.length != B.length) throw TypeError("kmer.correlation requires both Uint32Arrays to have equal length");
+	else {
+	    let n = A.length;
+	    let meanA =	A.reduce((x, y) => x + y)/n;
+	    let meanB = B.reduce((x, y) => x + y)/n;
+	    let ssxy = A.map((a,i) => a*B[i]).reduce((x,y)=>x+y) - n*meanA*meanB;
+	    //let ssxy = A.map((a, i) => (a - meanA)*(B[i] - meanB)).reduce((x,y) => x+y);
+	    let ssxx = A.map((a) => a*a).reduce((x,y)=>x+y) - n*meanA*meanA;
+	    //let ssxx = A.map((a) => Math.pow(a-meanA, 2)).reduce((x,y) => x+y);
+	    let ssyy = B.map((b) => b*b).reduce((x,y)=>x+y) - n*meanB*meanB;
+	    //let ssyy = B.map((b) => Math.pow(b - meanB, 2)).reduce((x,y) => x+y);
+	    return ssxy/Math.sqrt(ssxx*ssyy);
+	}
+    }
+    
 }
 
 

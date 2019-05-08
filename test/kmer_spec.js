@@ -11,6 +11,8 @@ const fs = require("fs");
 const fasta = require("bionode-fasta");
 const rewire = require("rewire");
 const BigNumber = require("bignumber.js");
+const Promise = require("bluebird");
+
 
 // Module
 var kmerConstructor = rewire("./../");
@@ -50,15 +52,15 @@ describe("kmerJS", function(){
 		});
 		it("throws a TypeError when run with a floating point number", function(){
 		    expect(function(){
-			new kmerConstructor(4.4)
+			new kmerConstructor(4.4);
 		    }).to.throw(TypeError, "This was a float");
 		});
 	    });
 	    describe("invalid second positional argument", function(){
 		it("throws a TypeError when run with an Number", function(){
 		    expect(function(){
-			new kmerConstructor(k, 1)
-		    }).to.throw(TypeError, "expects the optional second positional argument to be a String")
+			new kmerConstructor(k, 1);
+		    }).to.throw(TypeError, "expects the optional second positional argument to be a String");
 		});
 		it("throws a TypeError when run with a boolean", function(){
 		    expect(function(){
@@ -84,10 +86,10 @@ describe("kmerJS", function(){
 	});
 	describe("when run with proper arguments", function(){
 	    var kmer;
-	    var k
+	    var k;
 	    before(function(){
-		k = 2
-		kmer = new kmerConstructor(2)
+		k = 2;
+		kmer = new kmerConstructor(2);
 	    });
 	    it("will *not* throw a TypeError when run with undefined", function(){
 		expect(function(){
@@ -154,7 +156,7 @@ describe("kmerJS", function(){
 	var k;
 	var kmer;
 	before(function(done){
-	    k = 3
+	    k = 3;
 	    kmer = new kmerConstructor(k);
 	    done();
 	});
@@ -162,32 +164,32 @@ describe("kmerJS", function(){
 	    describe("invalid first positional argument", function(){
 		it("throws a TypeError when run on an undefined", function(){
 		    expect(function(){
-			kmer.kmerArray(undefined, 4)
+			kmer.kmerArray(undefined, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on a number", function(){
 		    expect(function(){
-			kmer.kmerArray(1, 4)
+			kmer.kmerArray(1, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on a boolean", function(){
 		    expect(function(){
-			kmer.kmerArray(true, 4)
+			kmer.kmerArray(true, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on an Array", function(){
 		    expect(function(){
-			kmer.kmerArray([], 4)
+			kmer.kmerArray([], 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on an object", function(){
 		    expect(function(){
-			kmer.kmerArray({}, 4)
+			kmer.kmerArray({}, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on a String whose length is < k", function(){
 		    expect(function(){
-			kmer.kmerArray("hello", 6)
+			kmer.kmerArray("hello", 6);
 		    }).to.throw(TypeError, "takes a String whose length > k as its first positional argument");
 		});
 	    });
@@ -223,7 +225,7 @@ describe("kmerJS", function(){
 		});
 		it("throws a TypeError when run with a floating point number", function(){
 		    expect(function(){
-			kmer.kmerArray(s, 4.4)
+			kmer.kmerArray(s, 4.4);
 		    }).to.throw(TypeError, "This was a float");
 		});
 	    });
@@ -232,7 +234,7 @@ describe("kmerJS", function(){
 	    var s;
 	    var substrings;
 	    function theoreticalMaximumSimple(n, k){
-		return n - k + 1
+		return n - k + 1;
 	    }
 
 	    before(function(){
@@ -259,7 +261,7 @@ describe("kmerJS", function(){
 	var k;
 	var kmer;
 	before(function(done){
-	    k = 3
+	    k = 2;
 	    kmer = new kmerConstructor(k);
 	    done();
 	});
@@ -267,32 +269,32 @@ describe("kmerJS", function(){
 	    describe("invalid first positional argument", function(){
 		it("throws a TypeError when run on an undefined", function(){
 		    expect(function(){
-			kmer.kmerFrequencies(undefined, 4)
+			kmer.kmerFrequencies(undefined, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on a number", function(){
 		    expect(function(){
-			kmer.kmerFrequencies(1, 4)
+			kmer.kmerFrequencies(1, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on a boolean", function(){
 		    expect(function(){
-			kmer.kmerFrequencies(true, 4)
+			kmer.kmerFrequencies(true, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on an Array", function(){
 		    expect(function(){
-			kmer.kmerFrequencies([], 4)
+			kmer.kmerFrequencies([], 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on an object", function(){
 		    expect(function(){
-			kmer.kmerFrequencies({}, 4)
+			kmer.kmerFrequencies({}, 4);
 		    }).to.throw(TypeError, "takes a String as its first positional argument");
 		});
 		it("throws a TypeError when run on a String whose length is < k", function(){
 		    expect(function(){
-			kmer.kmerFrequencies("hello", 6)
+			kmer.kmerFrequencies("hello", 6);
 		    }).to.throw(TypeError, "takes a String whose length > k as its first positional argument");
 		});
 	    });
@@ -349,13 +351,19 @@ describe("kmerJS", function(){
 	    it("returns an Uint32Array", function(){
 		expect(kmer.kmerFrequencies(s, 2)).to.be.an.instanceof(Uint32Array);
 	    });
-	    it("returns the theoretical maximum (n!/(n-k)! = n-k+1) substrings' frequencies", function(){
+	    it("returns the theoretical maximum (n!/(n-k)! = n-k+1) substrings' frequencies", function(done){
 		// Test all cases where 0 < k < n and prove that the theoretically correct number of substrings is calculated.
-		for (i=1; i < s.length; i++){
+		range = Array.apply(null, {length: s.length}).map(Number.call, Number).map(function(i){
+		    return new Promise(function(resolve, reject){
+		    kmar = new kmerConstructor(i);
 		    var maxProfileLength = Math.pow(4, i);
-		    expect(kmer.kmerFrequencies(s, i)).to.have.lengthOf(maxProfileLength);
-		}
-	    });
+		    expect(kmar.kmerFrequencies(s, i)).to.have.lengthOf(maxProfileLength);
+		    });
+		});
+		Promise.join(range).then(function(){
+		    done();
+		});
+	    }).timeout(10000);
 	    describe("when k is 2", function(){
 		it("returns the correct frequencies for the string", function(){
 		    expect(kmer.kmerFrequencies(s, 2)).to.deep.equal(frequencies);
@@ -393,7 +401,8 @@ describe("kmerJS", function(){
 	    });
 	});
 	describe("when run with a proper BioNode file stream", function(){
-	    it("updates the profile when piped bionode sequence objects", function(done){
+	    it("updates the profile when piped bionode sequence objects", function(){
+
 		var expectedProfile = new Uint32Array([604,
 						       609,
 						       657,
@@ -410,13 +419,17 @@ describe("kmerJS", function(){
 						       571,
 						       860,
 						       352]);
-		fs.createReadStream(testFasta, {encoding: "UTF-8"})
-		    .pipe(fasta.obj())
-		    .pipe(kmer.streamingUpdate())
-	            .on('finish', function(){
-			expect(kmer.profile).to.deep.equal(expectedProfile);
-			done()
-		    });
+		expect(new Promise(function(resolve, reject){
+		    fs.createReadStream(testFasta, {encoding: "UTF-8"})
+			.pipe(fasta.obj())
+			.pipe(kmer.streamingUpdate())
+			.on('finish', function(){
+			    resolve(kmer.profile);
+			}).on("error", function(err){
+			    throw err;
+			    reject(err);
+			});
+		})).to.eventually.deep.equal(expectedProfile);
 	    }).timeout(10000);
 	});
     });
@@ -492,7 +505,7 @@ describe("kmerJS", function(){
     describe("sequenceToBinary()", function(){
 	var kmer;
 	before(function(){
-	    kmer = new kmerConstructor(2);
+	    kmer = new kmerConstructor(3);
 	});
 	describe("when run with improper arguments", function(){
 	    describe("invalid positional argument", function(){
@@ -521,9 +534,14 @@ describe("kmerJS", function(){
 			kmer.sequenceToBinary({});
 		    }).to.throw(TypeError, "takes a String as its only positional argument");
 		});
+		it("throws a TypeError when run on a String whose length is not k", function(){
+		    expect(function(){
+			kmer.sequenceToBinary("ACTG");
+		    }).to.throw(TypeError, "takes a String with length equal to k as its only positional argument");
+		});
 		it("throws a TypeError when run on a String with invalid letters", function(){
 		    expect(function(){
-			kmer.sequenceToBinary("hello world");
+			kmer.sequenceToBinary("oof");
 		    }).to.throw(TypeError, "takes a String with letters in the specified alphabet as its only positional argument");
 		});
 	    });
@@ -984,13 +1002,15 @@ describe("kmerJS", function(){
 	var kmer;
 	var prof1;
 	var prof2;
+	var prof3;
 	var alphabet;
 	before(function(){
 	    k = 2;
 	    alphabet = "ACGT";
 	    prof1 = new Uint32Array([4, 3]);
-	    prof2 = new Uint32Array([0, 0]);
-	    dist = 5;
+	    prof2 = new Uint32Array([12, 9]);
+	    prof3 = new Uint32Array([4, 0]);
+	    dist = 0;
 	    kmer = new kmerConstructor(k);
 	});
 	describe("when run with an improper argument", function(){
@@ -1050,8 +1070,88 @@ describe("kmerJS", function(){
 	    });
 	});
 	describe("when run with proper arguments", function(){
+	    it("normalizes the vectors before euclidean distance", function(){
+		expect(kmer.euclidean(prof1, prof1)).to.equal(0);
+		expect(kmer.euclidean(prof1, prof2)).to.equal(0);
+	    });
 	    it("returns the correct distance of a pythagorean triple", function(){
-		expect(kmer.euclidean(prof1, prof2)).to.equal(dist);
+		expect(kmer.euclidean(prof1, prof3)).to.equal(0.63245553);
+	    });
+	});
+    });
+    describe("correlation", function(){
+	var k;
+	var kmer;
+	var prof1;
+	var prof2;
+	var alphabet;
+	before(function(){
+	    k = 2;
+	    alphabet = "ACGT";
+	    prof1 = new Uint32Array([1,2,3,4]);
+	    prof2 = new Uint32Array([4,3,2,1]);
+	    kmer = new kmerConstructor(k);
+	});
+	describe("when run with an improper argument", function(){
+	    describe("invalid first positional argument", function(){
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.correlation(undefined);
+		    }).to.throw(TypeError, "takes a Uint32Array as its first positional argument");
+		});
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.correlation(true);
+		    }).to.throw(TypeError, "takes a Uint32Array as its first positional argument");
+		});
+		it("throws a TypeError when run with an Array", function(){
+		    expect(function(){
+			kmer.correlation([]);
+		    }).to.throw(TypeError, "takes a Uint32Array as its first positional argument");
+		});
+		it("throws a TypeError when run with an Object", function(){
+		    expect(function(){
+			kmer.correlation({});
+		    }).to.throw(TypeError, "takes a Uint32Array as its first positional argument");
+		});
+		it("throws a TypeError when run with a String", function(){
+		    expect(function(){
+			kmer.correlation("A");
+		    }).to.throw(TypeError, "takes a Uint32Array as its first positional argument");
+		});
+	    });
+	    describe("invalid second positional argument", function(){
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.correlation(prof1, undefined);
+		    }).to.throw(TypeError, "takes a Uint32Array as its second positional argument");
+		});
+		it("throws a TypeError when run with a boolean", function(){
+		    expect(function(){
+			kmer.correlation(prof1, true);
+		    }).to.throw(TypeError, "takes a Uint32Array as its second positional argument");
+		});
+		it("throws a TypeError when run with an Array", function(){
+		    expect(function(){
+			kmer.correlation(prof1, []);
+		    }).to.throw(TypeError, "takes a Uint32Array as its second positional argument");
+		});
+		it("throws a TypeError when run with an Object", function(){
+		    expect(function(){
+			kmer.correlation(prof1, {});
+		    }).to.throw(TypeError, "takes a Uint32Array as its second positional argument");
+		});
+		it("throws a TypeError when run with a String", function(){
+		    expect(function(){
+			kmer.correlation(prof1, "A");
+		    }).to.throw(TypeError, "takes a Uint32Array as its second positional argument");
+		});		
+	    });
+	});
+	describe("when run with proper arguments", function(){
+	    it("returns the correct (anti)correlation distance", function(){
+		expect(kmer.correlation(prof1, prof1)).to.equal(1);
+		expect(kmer.correlation(prof1, prof2)).to.equal(-1);
 	    });
 	});
     });
