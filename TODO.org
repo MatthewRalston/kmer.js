@@ -1,0 +1,43 @@
+* Purpose/Motivation
+** Provide a simple, intuitive kmer API and CLI for kmer profile generation
+** Demonstrate the appropriate distance metric to show similarity between two kmer profiles
+** Demonstrate scalability of the algorithm on different sized genomes
+* Background
+* Methodology
+* Graphics/Hypotheses
+* References
+
+* Questions
+** Distance metrics
+*** What is the appropriate distance metric between profiles?
+**** Euclidean
+**** Normalized squared euclidean distance
+*** Is there a fast calculation for these distance metrics?
+*** Should this library be refactored into a Python executable?
+*** Should multiprocessing support be included?
+** Probability metrics
+*** Can the probability metric demonstrate *basic* recall of a sequence from the genome?
+*** How does the probability metric adapt to point mutations in the sequence?
+**** How many different locations in a single sequence should be given a single point mutation?
+**** How many different single sequences should be tested to show generalization of the metric?
+*** How does the probability metric handle sequences from related genomes?
+** How can the 
+
+* Deliverables
+** Multiple distance metrics
+** 
+
+
+
+* Distance and normalizations
+** Normalize by median method?
+** Distance is median of pairwise counts
+
+* Check distribution of counts on real world data
+** Run on maybe 10 TCGA, 10 metagenomes, 10 bacterial, 10 mammalian?
+** RStudio look at distributions
+** Make KnitR report of distributions
+* Normalizations
+** Make density plots
+** Look at boxplot before/after normalizations w/ different normalizations
+* Base the distance metrics off of the distribution

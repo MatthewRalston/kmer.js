@@ -1,55 +1,56 @@
 {
-    "name": "kmer.js",
-    "version": "0.1.0",
-    "engines": {
-	"node": ">=6.10"
-    },
-    "description": "A javascript module and CLI for shredding sequences into k-mers.",
-    "main": "./kmer.js",
-    "scripts": {
-	"test": "./node_modules/.bin/nyc --reporter=html --reporter=text ./node_modules/.bin/mocha test/*_spec.js",
-	"bench": "node ./test/kmer_perf.js",
-	"coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls"
-    },
-    "directories": {
-	"doc": "./docs"
-    },
-    "Keywords": [
-	"bio",
-	"kmers",
-	"kmer",
-	"bioinformatics"
-    ],
-    "author": "Matthew Ralston <mrals89@gmail.com>",
-    "license": "GPL-3.0",
-    "url": "https://www.npmjs.com/package/kmer.js",
-    "repository": {
-	"type": "git",
-	"url": "https://github.com/MatthewRalston/kmer.js"
-    },
-    "bugs": {
-	"url": "https://github.com/MatthewRalston/kmer.js/issues",
-	"email": "mrals89@gmail.com"
-    },
-    "devDependencies": {
-	"benchmark": "^2.1.4",
-	"bionode-fasta": "^0.5.6",
-	"bionode-fastq": "^2.2.0",
-	"chai": "^4.1.2",
-	"chai-as-promised": "^7.1.1",
-	"coveralls": "^3.0.0",
-	"mocha": "^4.1.0",
-	"nyc": "^11.4.1",
-	"rewire": "^3.0.2",
-	"yuidocjs": "^0.10.2"
-    },
-    "dependencies": {
-	"bignumber.js": "^6.0.0",
-	"through2": "^2.0.3",
-	"type-of-is": "^3.5.1"
-    },
-    "os": [
-	"darwin",
-	"linux"
-    ]
+  "name": "kmer.js",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=6.10"
+  },
+  "description": "A javascript module and CLI for shredding sequences into k-mers.",
+  "main": "./kmer.js",
+  "scripts": {
+    "test": "./node_modules/.bin/nyc --reporter=html --reporter=text ./node_modules/.bin/mocha test/*_spec.js",
+    "bench": "node ./test/kmer_perf.js",
+    "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls"
+  },
+  "directories": {
+    "doc": "./docs"
+  },
+  "Keywords": [
+    "bio",
+    "kmers",
+    "kmer",
+    "bioinformatics"
+  ],
+  "author": "Matthew Ralston <mrals89@gmail.com>",
+  "license": "GPL-3.0",
+  "url": "https://www.npmjs.com/package/kmer.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MatthewRalston/kmer.js"
+  },
+  "bugs": {
+    "url": "https://github.com/MatthewRalston/kmer.js/issues",
+    "email": "mrals89@gmail.com"
+  },
+  "devDependencies": {
+    "benchmark": "^2.1.4",
+    "bionode-fasta": "^0.5.6",
+    "bionode-fastq": "^2.2.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.0",
+    "mocha": "^4.1.0",
+    "nyc": "^11.4.1",
+    "rewire": "^3.0.2",
+    "yuidocjs": "^0.10.2"
+  },
+  "dependencies": {
+    "bignumber.js": "^6.0.0",
+    "bluebird": "^3.5.4",
+    "through2": "^2.0.3",
+    "type-of-is": "^3.5.1"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ]
 }

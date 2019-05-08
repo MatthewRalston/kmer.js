@@ -262,8 +262,11 @@ class Kmer {
 	var update = this.update;
 	var thisArg = this;
 	return through2.obj(function(data, enc, callback){
-	  if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
-	  else if (! ("seq" in data && Type.is(data.seq, String))) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
+	    if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
+	    else if (!data.hasOwnProperty("seq") && !Type.is(data.seq, String)) {
+		console.log(data);
+		throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
+	    }
 	  else {
 	    update(data.seq, thisArg);
 	    callback();
@@ -277,6 +280,7 @@ class Kmer {
      * @method sequenceToBinary
      * @param {String} s A biological sequence to convert into a binary integer
      * @throws {TypeError} If s is not a String
+     * @throws {TypeError} If length of s is not k
      * @throws {TypeError} If there are letters in seq that aren't in the sequence alphabet
      * @return {Number} Returns an integer encoding of a k-mer
      * 
@@ -287,6 +291,7 @@ class Kmer {
      */
     sequenceToBinary(s){
 	if (!Type.is(s, String)) throw TypeError("kmer.sequenceToBinary takes a String as its only positional argument");
+	else if (s.length != this.k) throw TypeError("kmer.sequenceToBinary takes a String with length equal to k as its only positional argument");
 	else if (s.match(this.notInAlphabet)) throw TypeError("kmer.sequenceToBinary takes a String with letters in the specified alphabet as its only positional argument");
 	else {
 	    var result = 0x00;
