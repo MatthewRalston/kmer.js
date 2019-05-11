@@ -353,7 +353,7 @@ describe("kmerJS", function(){
 	    });
 	    it("returns the theoretical maximum (n!/(n-k)! = n-k+1) substrings' frequencies", function(done){
 		// Test all cases where 0 < k < n and prove that the theoretically correct number of substrings is calculated.
-		range = Array.apply(null, {length: s.length}).map(Number.call, Number).map(function(i){
+		let range = Array.apply(null, {length: s.length}).map(Number.call, Number).map(function(i){
 		    return new Promise(function(resolve, reject){
 		    kmar = new kmerConstructor(i);
 		    var maxProfileLength = Math.pow(4, i);
@@ -1149,9 +1149,13 @@ describe("kmerJS", function(){
 	    });
 	});
 	describe("when run with proper arguments", function(){
+	    it("returns a number", function(){
+		expect(kmer.correlation(prof1, prof1)).to.be.a('number');
+	    });
 	    it("returns the correct (anti)correlation distance", function(){
-		expect(kmer.correlation(prof1, prof1)).to.equal(1);
-		expect(kmer.correlation(prof1, prof2)).to.equal(-1);
+
+		expect(kmer.correlation(prof1, prof1)).to.equal(1.00000);
+		expect(kmer.correlation(prof1, prof2)).to.equal(-1.00000);
 	    });
 	});
     });

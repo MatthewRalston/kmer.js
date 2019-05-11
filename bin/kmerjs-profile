@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+
+
+const program = require('commander');
+const Type = require('type-of-is');
+
+
+// Kmer.js
+
+const logger = require('./../app/loadLogger').logger;
+const reader = require('./../app/readProfile');
+// Initialize
+var k;
+
+
+
+// CLI
+program
+    .description('Writes a vector on integers of kmer counts to STDOUT')
+    .arguments('<seqpath>')
+    .option('-k <k>', 'k-mer size to use', parseInt, 12)
+    .option('-v, --verbose', 'Enable log-level debugging')
+    .action(function(seqpath, options){
+	if (options.verbose) logger.level = 'debug';
+	if (!Type.is(options.K, Number)) {
+	    logger.error(options.K);
+	    logger.error("option k must be an integer");
+	    process.exit(1);
+	} else {
+
+	    logger.debug(`Path was ${seqpath}`);
+	    logger.debug(`k set to ${options.K}`);
+	    reader(options.K, seqpath).then(function(prof){
+		logger.info("Done");
+		console.log(prof.join("\n"));
+	    }).on("error", function(err){
+		logger.debug(err);
+		throw err;
+	    });
+	}
+    });
+program.parse(process.argv);
+
+
+
+

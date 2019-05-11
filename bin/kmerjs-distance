@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+
+
+const Promise = require('bluebird');
+const program = require('commander');
+const Type = require('type-of-is');
+// Kmer.js
+const kmerConstructor = require('./../kmer');
+const reader = require('./../app/readProfile');
+const logger = require('./../app/loadLogger').logger;
+// Initialize
+var k = 12;
+var kmer;
+const validDistances = ['correlation', 'euclidean'];
+
+
+// CLI
+program
+    .description('Creates a correlation matrix of sequence profiles')
+    .arguments('<seqpath1> <seqpath2> [otherSeqPaths...]')
+    .option('-k <k>', `k-mer size to use. (default: ${k})`, parseInt)
+    .option('-d, --distance <dist>', `distance metric to use: ${validDistances}`, 'correlation')
+    .option('-v, --verbose', 'Enable log-level debugging')
+    .action(function(seqpath1, seqpath2, otherSeqPaths, options){
+	if (options.verbose) logger.level = 'debug';
+	if (options.K === undefined) options.K = k;
+	if (!Type.is(options.K, Number)) {
+	    logger.error(`option k must be an integer: ${options.K}`);
+	    process.exit(1);
+	} else {
+	    logger.debug(`k set to ${options.K}`);
+	    kmer = new kmerConstructor(options.K);
+	    if (!otherSeqPaths.length) {
+		logger.info(`Calculating distance of normalized profiles of '${seqpath1}' to '${seqpath2}'`)
+	    	let kmer = new kmerConstructor(options.K);
+		Promise.join(reader(options.K, seqpath1), reader(options.K, seqpath2), function(p1, p2){
+		    if (options.distance === 'correlation') console.log(kmer.correlation(p1, p2));
+		    else if (options.distance === 'euclidean') console.log(kmer.euclidean(p1, p2));
+		    else {
+			logger.error(`kmerjs-distance hasn't implemented distance metric '${options.distance}'`)
+			process.exit(1);
+		    }
+		});
+
+	    } else { // Matrix
+		otherSeqPaths.unshift(seqpath1, seqpath2);
+		logger.info(`Calculating correlation matrix of normalized profiles of the following sequence files:\n${otherSeqPaths.join('\n')}`)
+		let kmer = new kmerConstructor(options.K);
+		let data = []
+		let profs = Promise.each(otherSeqPaths, function(i){
+		    return new Promise(function(resolve, reject){
+			reader(options.K, i).then(function(j){
+			    data.push(j);
+			    resolve(j)
+			});
+		    });
+		});
+
+		return Promise.all(profs).then(function(){
+		    console.log(data.map(function(x, i){
+			return data.map(function(y, j){
+			    let c = [i,j].sort().join('')
+			    if (x === y) {
+				if (options.distance === 'correlation') return 1;
+				else if (options.distance === 'euclidean') return 0;
+			    } else if (j > i) {
+				return '';
+			    }else {
+				if (options.distance === 'correlation') return kmer.correlation(x, y);
+				else if (options.distance === 'euclidean') return kmer.euclidean(x, y);
+				else {
+				    logger.error(`kmerjs-distance has not implemented distance metric '${options.distance}'`);
+				}
+
+			    }
+			}).reduce(function(total, z){
+			    total.push(z);
+			    return total;
+			}, []);
+				  
+		    }).map((a) => a.join("\t")).join("\n"));
+		});
+	    }
+	}
+    });
+program.parse(process.argv);

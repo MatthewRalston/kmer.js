@@ -33,9 +33,7 @@
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
-      "bionode-fasta": "^0.5.6",
-      "bionode-fastq": "^2.2.0",
-      "bluebird": "^3.5.4",
+    "bluebird": "^3.5.4",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",
@@ -45,7 +43,12 @@
     "yuidocjs": "^0.10.2"
   },
   "dependencies": {
+    "aws-sdk": "^2.452.0",
     "bignumber.js": "^6.0.0",
+    "bionode-fasta": "^0.5.6",
+    "bionode-fastq": "^2.2.0",
+    "commander": "^2.20.0",
+    "log4js": "^4.1.1",
     "through2": "^2.0.3",
     "type-of-is": "^3.5.1"
   },

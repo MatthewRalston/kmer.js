@@ -12,6 +12,7 @@
 *** What is the appropriate distance metric between profiles?
 **** Euclidean
 **** Normalized squared euclidean distance
+**** Correlation distance
 *** Is there a fast calculation for these distance metrics?
 *** Should this library be refactored into a Python executable?
 *** Should multiprocessing support be included?

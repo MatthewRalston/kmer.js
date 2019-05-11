@@ -463,28 +463,20 @@ class Kmer {
 	else if (A.length != B.length) throw TypeError("kmer.euclidean requires both Uint32Arrays to have equal length");
 	else {
 	    //let totA = 	a.reduce((x, y) => x + y);
-	    let normA = Math.sqrt(A.map((x) => x*x).reduce((x,y) => x+y));
-	    // let normalizedA = Array.from(A).map((x) => x/normA);
+	    let normA = Math.sqrt(Array.from(A).map((x) => x*x).reduce((x,y) => x+y));
+	    let normalizedA = Array.from(A).map((x) => x/normA);
 	    //let totB = b.reduce((x, y) => x + y);
-	    let normB = Math.sqrt(B.map((x) => x*x).reduce((x,y) => x+y));
-	    // let normalizedB = Array.from(B).map((x) => x/normB);
-	    // console.log("A:", A)
-	    // console.log("B:", B)
-	    // console.log("Norm of A:", normA)
-	    // console.log("Norm of B:", normB)
-	    // console.log("Normalized A:", normalizedA);
-	    // console.log("Normalized B:", normalizedB);
-
-	    
-	    let final = Array.from(A).map(function(a, i) {
+	    let normB = Math.sqrt(Array.from(B).map((x) => x*x).reduce((x,y) => x+y));
+	    let normalizedB = Array.from(B).map((x) => x/normB);
+	    let final = normalizedA.map(function(a, i) {
 	    	// Divide by the magnitude/norm of each vector to make them unit vectors
 		// let normCoordA=a/normA;
 		// console.log("a / normA = " + a + "/" + normA + " = " + normCoordA);
 		// console.log(BigNumber(normCoordA))
-	    	return new BigNumber(a/normA).minus(BigNumber(B[i]/normB)).pow(2);
-	    }).reduce((x,y) => x.plus(y));
-
-	    return Number(Math.sqrt(final.toNumber()).toFixed(8));
+		let diff = Number(a.toFixed(10)) - Number(normalizedB[i].toFixed(10));
+	    	return Math.pow(diff, 2);
+	    }).reduce((x,y) => x+y);
+	    return Number(Math.sqrt(final).toFixed(8));
 	}
     }
 
@@ -492,7 +484,7 @@ class Kmer {
 
     
     /*
-     * Calculates the Pearson correlation similarity of two un-normalized profiles
+     * Calculates the Pearson correlation coefficient of unit/normalized vectors from 2 count profiles
      * 
      * @method correlation
      * @param {Uint32Array} A, a kmer profile of integer counts
@@ -514,15 +506,25 @@ class Kmer {
 	else if (A.length != B.length) throw TypeError("kmer.correlation requires both Uint32Arrays to have equal length");
 	else {
 	    let n = A.length;
-	    let meanA =	A.reduce((x, y) => x + y)/n;
-	    let meanB = B.reduce((x, y) => x + y)/n;
-	    let ssxy = A.map((a,i) => a*B[i]).reduce((x,y)=>x+y) - n*meanA*meanB;
-	    //let ssxy = A.map((a, i) => (a - meanA)*(B[i] - meanB)).reduce((x,y) => x+y);
-	    let ssxx = A.map((a) => a*a).reduce((x,y)=>x+y) - n*meanA*meanA;
-	    //let ssxx = A.map((a) => Math.pow(a-meanA, 2)).reduce((x,y) => x+y);
-	    let ssyy = B.map((b) => b*b).reduce((x,y)=>x+y) - n*meanB*meanB;
-	    //let ssyy = B.map((b) => Math.pow(b - meanB, 2)).reduce((x,y) => x+y);
-	    return ssxy/Math.sqrt(ssxx*ssyy);
+
+	    let normA = Math.sqrt(Array.from(A).map((x) => x*x).reduce((x,y) => x+y));
+	    let normalizedA = Array.from(A).map((x) => x/normA);
+
+	    let normB = Math.sqrt(Array.from(B).map((x) => x*x).reduce((x,y) => x+y));
+	    let normalizedB = Array.from(B).map((x) => x/normB);
+
+
+	    let meanA =	normalizedA.reduce((x, y) => x + y)/n;
+	    let meanB = normalizedB.reduce((x, y) => x + y)/n;
+
+	    
+	    let ssxy = normalizedA.map((a,i) => a*normalizedB[i]).reduce((x,y)=>x+y) - n*meanA*meanB;
+	    //let ssxy = normalizedA.map((a, i) => (a - meanA)*(normalizedB[i] - meanB)).reduce((x,y) => x+y);
+	    let ssxx = normalizedA.map((a) => a*a).reduce((x,y)=>x+y) - n*meanA*meanA;
+	    //let ssxx = normalizedA.map((a) => Math.pow(a-meanA, 2)).reduce((x,y) => x+y);
+	    let ssyy = normalizedB.map((b) => b*b).reduce((x,y)=>x+y) - n*meanB*meanB;
+	    //let ssyy = normalizedB.map((b) => Math.pow(b - meanB, 2)).reduce((x,y) => x+y);
+	    return Number(Number(ssxy/Math.sqrt(ssxx*ssyy)).toFixed(5));
 	}
     }
     
