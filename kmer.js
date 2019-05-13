@@ -4,6 +4,10 @@ const Type      = require('type-of-is');
 const through2  = require('through2');
 const BigNumber = require('bignumber.js');
 
+// // Logger | enable only during debugging
+// var logger = require('./app/loadLogger').logger;
+// logger.level = 'debug';
+
 /**
  * Provides the Kmer class
  * 
@@ -354,12 +358,13 @@ class Kmer {
 
     /**
      * Calculates a frequency of a sequence in the profile
+     * NOTE: May require at least one call to kmer.TotalProfileCounts()
      * 
      * @method frequency
      * @param {String} seq A sequence to retrieve the relative count/frequency
      * @throws {TypeError} If seq is not a String
      * @throws {TypeError} If seq is not a kmer (has a length of k)
-     * @return {BigNumber} The frequency (count/totalCounts) of the sequence from the profile
+     * @return {Number} The frequency (count/totalCounts) of the sequence from the profile
      *
      * @example
      *     >var testKmer = "AAAAAAAAA";
@@ -370,11 +375,13 @@ class Kmer {
     frequency(seq){
 	if (!Type.is(seq, String)) throw TypeError("kmer.frequency takes a String as its only positional argument");
 	else if (seq.length != this.k) throw TypeError(`kmer.frequency takes a String with length ${this.k} as its only positional argument`);
-	else return new BigNumber(this.profile[this.sequenceToBinary(seq)]).div(this.totalProfileCounts);
+	else if (this.normalizedProfile === undefined) return this.profile[this.sequenceToBinary(seq)]/this.totalProfileCounts;
+	else return this.normalizedProfile[this.sequenceToBinary(seq)];
     }
 
     /**
      * Calculates the transition probability of one sequence to the next in a Markov chain
+     * NOTE: May require at least one call to kmer.TotalProfileCounts()
      * 
      * @method transitionProbability
      * @param {String} seq1 
@@ -383,7 +390,7 @@ class Kmer {
      * @throws {TypeError} If seq1 is not a kmer (has a length of k)
      * @throws {TypeError} If seq2 is not a String
      * @throws {TypeError} If seq2 is not a kmer (has a length of k)
-     * @return {BigNumber} The transition probability of seq1 to seq2
+     * @return {Number} The transition probability of seq1 to seq2
      * 
      * @example
      *     >var testKmer1 = "AAAAAAAAA";
@@ -393,18 +400,66 @@ class Kmer {
      *     0.111048
      */
     transitionProbability(seq1, seq2){
-	this.TotalProfileCounts();
 	if (!Type.is(seq1, String)) throw TypeError("kmer.transitionProbability takes a String as its first positional argument");
 	else if (!Type.is(seq2, String)) throw TypeError("kmer.transitionProbability takes a String as its second positional argument");
-	else if (seq1.length != this.k) throw TypeError(`kmer.transitionProbability takes a sequence of length ${this.k} as its first positional argument`);
-	else if (seq2.length != this.k) throw TypeError(`kmer.transitionProbability takes a sequence of length ${this.k} as its second positional argument`);
+	else if (seq1.length !== this.k) throw TypeError(`kmer.transitionProbability takes a sequence of length ${this.k} as its first positional argument`);
+	else if (seq2.length !== this.k) throw TypeError(`kmer.transitionProbability takes a sequence of length ${this.k} as its second positional argument`);
 	else {
-	    let suffix1 = seq1.substring(1, seq1.length);
-	    let prefix2 = seq2.substring(0, seq2.length - 1);
-	    if (suffix1 != prefix2) return new BigNumber(0);
-	    else return this.frequency(seq2).div(this.alphabet.split('').map((c) => this.frequency(suffix1 + c)).reduce((a, b) => a.plus(b)));
+	    let suffix1 = seq1.substring(1, this.k);
+	    let prefix2 = seq2.substring(0, this.k - 1);
+	    if (suffix1 != prefix2) return 0;
+	    else {
+		let freq2 = this.frequency(seq2);
+		if (freq2 === 0) return 0;
+		else {
+		    let freqs = this.alphabet.split('').map((c) => this.frequency(suffix1 + c));
+		    //logger.debug(`'${seq1}'=>'${seq2}'`);
+		    //logger.debug(`${freq2} / ${freqs.join(" + ")}`);
+		    return freq2 / freqs.reduce((x,y) => x+y);
+		}
+	    }
 	}
     }
+
+
+    // /**
+    //  * Karatsuba multiplication is much faster than standard multiplication
+    //  * This implementation is thanks to StackOverflow user 'vijayalakshmi d'
+    //  * https://stackoverflow.com/a/28376023/2005704
+    //  *
+    //  * @method karatsuba
+    //  * @param {Number} x
+    //  * @param {Number} y
+    //  * @return {Number} The product of x and y
+
+    //  *
+    //  **/
+    // karatsuba(x,y) {
+    // 	var x1,x0,y1,y0,base,m;
+    // 	base  = 10;
+    // 	if((x<base)||(y<base)){
+    // 	    return x * y;
+    // 	}
+
+    // 	var dummy_x = x.toString();
+    // 	var dummy_y = y.toString();
+
+    // 	var n = (dummy_x.length > dummy_y.length) ? dummy_y.length : dummy_x.length;
+    // 	m = Math.round(n/2);
+    // 	var high1 = parseInt(dummy_x.substring(0,dummy_x.length-m));
+    // 	var low1 = parseInt(dummy_x.substring(dummy_x.length-m,dummy_x.length  )) ;
+
+    // 	var high2 = parseInt(dummy_y.substring(0,dummy_y.length-m)); 
+    // 	var low2 = parseInt(dummy_y.substring(dummy_y.length-m,dummy_y.length));
+    // 	var z0   =   karatsuba( low1, low2);
+    // 	var z1   =   karatsuba(low1+high1, low2+high2);
+    // 	var z2   =   karatsuba(high1,high2);
+
+    // 	var res  =   (z2 *  Math.pow(10, 2 * m )  ) + ( (z1-z2-z0) * Math.pow(10,  m )) + z0;
+
+    // 	return res;
+
+    // }
 
     /**
      * Calculates the Markov chain probability of a sequence from its transition probabilities
@@ -427,18 +482,29 @@ class Kmer {
 	else if (seq.length <= this.k) throw TypeError("kmer.probabilityOfSequence takes a String with length greater than " + this.k + " as its only positional argument");
 	else if (seq.match(this.notInAlphabet)) throw TypeError(`kmer.probabilityOfSequence takes a String with letters from the alphabet '${this.alphabet}'`);
 	else {
-	    let substrings = this.kmerArray(seq, this.k);
-	    let p = 1;
-	    for (var i = 0; i < (substrings.length - 1); i++) {
-		//console.log("Transition for:", substrings[i], substrings[i+1]);
-		//console.log("Current accumulator:", p);
-	    	p = this.transitionProbability(substrings[i], substrings[i+1]).times(p);
+	    if (this.normalizedProfile === undefined) {
+		let fullProf = Array.from(this.profile);
+		let norm = fullProf.map((x) => x*x).reduce((x,y) => x+y);
+		this.normalizedProfile = Array.from(this.profile).map((x) => Number(Number(x/norm).toFixed(15)));
 	    }
-	    return p;
+	    let self = this;					      
+	    let substrings = this.kmerArray(seq, this.k);
+	    let numsubstrings = substrings.length - 1;
+	    let transitionProbs = substrings.map(function(s, i) {
+		if (i === numsubstrings) return 1; // Ignore the terminal 0
+		else return  self.transitionProbability(s, substrings[i+1]);
+	    });
+	    //logger.debug(transitionProbs);
+	    return transitionProbs.reduce(function(x,y){
+		return x*y;
+	    }, 1);
 
 	}
     }
 
+    
+
+    
     /*
      * Calculates the Euclidean similarity of unit/normalized vectors from 2 count profiles
      * Converts each count to a BigNum frequency temporarily to calculate the euclidean distance

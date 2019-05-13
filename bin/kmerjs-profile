@@ -9,7 +9,7 @@ const Type = require('type-of-is');
 // Kmer.js
 
 const logger = require('./../app/loadLogger').logger;
-const reader = require('./../app/readProfile');
+const reader = require('./../app/readProfile').getProfile;
 // Initialize
 var k = 12;
 
@@ -26,8 +26,7 @@ program
 	if (options.verbose) logger.level = 'debug';
 	if (options.K === undefined) options.K = k;
 	if (!Type.is(options.K, Number)) {
-	    logger.error(options.K);
-	    logger.error("option k must be an integer");
+	    logger.error(`option k must be an integer: '${options.K}'`);
 	    process.exit(1);
 	} else {
 	    logger.debug(`k set to ${options.K}`);

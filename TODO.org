@@ -1,3 +1,9 @@
+
+* Refactors
+** probabilityOfSequence, transitionPorbability, and frequency
+** Pass them a normalized array so frequenies only need to be counted once
+
+
 * Purpose/Motivation
 ** Provide a simple, intuitive kmer API and CLI for kmer profile generation
 ** Demonstrate the appropriate distance metric to show similarity between two kmer profiles

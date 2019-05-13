@@ -6,7 +6,7 @@ const program = require('commander');
 const Type = require('type-of-is');
 // Kmer.js
 const kmerConstructor = require('./../kmer');
-const reader = require('./../app/readProfile');
+const reader = require('./../app/readProfile').getProfile;
 const logger = require('./../app/loadLogger').logger;
 // Initialize
 var k = 12;

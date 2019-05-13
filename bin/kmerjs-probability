@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+
+
+
+const program = require('commander');
+const Type = require('type-of-is');
+const fs = require('fs');
+const Promise = require('bluebird');
+// Kmer.js
+
+const logger = require('./../app/loadLogger').logger;
+const reader = require('./../app/readProfile');
+const kmerConstructor = require('./../kmer');
+// Initialize
+var k = 12;
+var kmer;
+
+
+// CLI
+program
+    .description('Markov probability of the query sequence(s) given the database')
+    .arguments('<query> <database>')
+    .option('-k <k>', 'k-mer size to use', parseInt)
+    .option('-v, --verbose', 'Enable log-level debugging')
+    .action(function(query, database, options){
+	if (options.verbose) logger.level = 'debug';
+	logger.level = 'debug';
+	if (options.K === undefined) options.K = k;
+
+	logger.info("Calculating likelihood of sequence from the product of the transition probabilities");
+	if (!Type.is(options.K, Number)) {
+	    logger.error(`option k must be an integer: '${options.K}'`);
+	    process.exit(1);
+	} else {
+	    logger.debug(`k set to ${options.K}`);
+	    kmer = new kmerConstructor(options.K);
+	    fs.access(query, fs.constants.R_OK, function(err){
+		if (err){
+		    logger.debug("The <query> argument was not a filepath...");
+		    if (query.match(kmer.notInAlphabet)) {
+			let err = new Error(`Filepath '${query}' is not accessible`);
+			logger.debug(err);
+			logger.debug("One or more letters in the query were not nucleotides 'A', 'C', 'T', 'G'");
+			logger.error("The <query> argument is neither a sequence nor a filepath");
+			process.exit(1);
+		    } else {
+			logger.debug("The <query> argument is a nucleic acid sequence");
+			reader.getProfile(options.K, database).then(function(prof){
+			    kmer.profile = prof;
+			    console.log(kmer.probabilityOfSequence(query));
+			});
+		    }
+
+		} else {
+		    logger.debug(`The <query> argument '${query}' is a filepath...`);
+		    Promise.join(reader.readFasta(query), reader.getProfile(options.K, database), function(queries, prof){
+			kmer.profile = prof;
+			return new Promise(function(resolve, reject){
+			    logger.debug("Normalizing profile. This could take a lot of memory");
+			    let profArr = Array.from(prof);
+			    let norm = profArr.map((x) => x*x).reduce((x,y) => x+y);
+			    resolve(profArr.map((x) => Number(Number(x/norm).toFixed(15))));
+			}).then(function(normalized){
+			    //logger.debug(normalized);
+			    kmer.normalizedProfile = normalized;
+			    logger.debug(`Calculating ${queries.length} probabilities`);
+			    return queries.map(function(seqobj, i){
+				logger.debug(`Sequence ${i}: Calculating transition probabilities of ${seqobj.seq.length - options.K + 1} ${options.K}-mers`);
+				return [seqobj.id, kmer.probabilityOfSequence(seqobj.seq)].join("\t");
+			    }).join("\n");
+			}).then(function(final){
+			    logger.debug("Done");
+			    console.log(final);
+			});
+		    });
+		}
+	    });
+	}
+    });
+
+program.parse(process.argv);
+
+

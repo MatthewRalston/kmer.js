@@ -297,6 +297,11 @@ describe("kmerJS", function(){
 			kmer.kmerFrequencies("hello", 6);
 		    }).to.throw(TypeError, "takes a String whose length > k as its first positional argument");
 		});
+		it("throws a TypeError when run on a string with letters not in the alphabet", function(){
+		    expect(function(){
+			kmer.kmerFrequencies("hello", 4);
+		    }).to.throw(TypeError, "takes a String with letters from the alphabet");
+		});
 	    });
 	    describe("invalid second positional argument", function(){
 		var s;
@@ -604,9 +609,6 @@ describe("kmerJS", function(){
 	});	
     });
 
-    describe("profileAsObject", function(){
-
-    });
     describe("profileAsArray", function(){
 	var numKmers;
 	var k;
@@ -800,11 +802,11 @@ describe("kmerJS", function(){
 	    });
 	});
 	describe("when run with proper arguments", function(){
-	    it("returns a BigNumber", function(){
-		expect(kmer.frequency("AA")).to.be.an.instanceof(BigNumber);
+	    it("returns a number", function(){
+		expect(kmer.frequency("AA")).to.be.a('number');
 	    });
 	    it("returns the correct frequency", function(){
-		expect(kmer.frequency("AA").toNumber()).to.equal(604/10300);
+		expect(kmer.frequency("AA")).to.equal(604/10300);
 	    });
 	});
     });
@@ -816,6 +818,7 @@ describe("kmerJS", function(){
 	var seq2;
 	before(function(){
 	    k = 2;
+	    alphabet = "ACGT";
 	    expectedProfile = new Uint32Array([604,
 					       609,
 					       657,
@@ -834,6 +837,7 @@ describe("kmerJS", function(){
 					       352]);
 	    kmer = new kmerConstructor(k);
 	    kmer.profile = expectedProfile;
+	    kmer.TotalProfileCounts();
 	    seq1 = "AA";
 	    seq2 = "AT";
 	});
@@ -900,11 +904,11 @@ describe("kmerJS", function(){
 	    });
 	});
 	describe("when run with proper arguments", function(){
-	    it("returns a BigNumber", function(){
-		expect(kmer.transitionProbability("AA", "AT")).to.be.an.instanceof(BigNumber);
+	    it("returns a number", function(){
+		expect(kmer.transitionProbability("AA", "AT")).to.be.a('number');
 	    });
 	    it("throws a TypeError when the suffix of seq1 is not equal to the suffix of seq2", function(){
-		expect(kmer.transitionProbability("AA", "TT").toNumber()).to.equal(0);
+		expect(kmer.transitionProbability("AA", "TT")).to.equal(0);
 	    });
 	    it("returns the expected transition probability for a sequence", function(){
 		var prefixProbs = [ 0.058640776699029125, // AA
@@ -912,7 +916,7 @@ describe("kmerJS", function(){
 				    0.0637864077669903, // AG
 				    0.04932038834951456 ]; // AT
 		var expectedTransitionProbability = prefixProbs[3]/prefixProbs.reduce((a,b) => a+b);
-		expect(kmer.transitionProbability("AA", "AT").toNumber()).to.equal(expectedTransitionProbability);
+		expect(kmer.transitionProbability("AA", "AT")).to.equal(expectedTransitionProbability);
 	    });
 	});
     });
@@ -984,8 +988,8 @@ describe("kmerJS", function(){
 	    });
 	});
 	describe("when run with proper arguments", function(){
-	    it("returns a BigNumber", function(){
-		expect(kmer.probabilityOfSequence("AAT")).to.be.an.instanceof(BigNumber);
+	    it("returns a number", function(){
+		expect(kmer.probabilityOfSequence("AAT")).to.be.a('number');
 	    });
 	    it("returns the product of transition probabilities of the kmers", function(){
 		var prefixProbs = [ 0.058640776699029125, // AA
@@ -993,7 +997,7 @@ describe("kmerJS", function(){
 				    0.0637864077669903, // AG
 				    0.04932038834951456 ]; // AT
 		var expectedTransitionProbability = prefixProbs[3]/prefixProbs.reduce((a,b) => a+b);
-		expect(kmer.probabilityOfSequence("AAT").toNumber()).to.equal(expectedTransitionProbability);
+		expect(Number(kmer.probabilityOfSequence("AAT").toFixed(10))).to.equal(Number(expectedTransitionProbability.toFixed(10)));
 	    });
 	});
     });
