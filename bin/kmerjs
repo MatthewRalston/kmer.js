@@ -3,7 +3,7 @@
 
 const commander = require('commander');
 const pkginfo = require('./../package.json');
-
+const logger = require('./../app/loadLogger').logger;
 
 
 // Initialize 
@@ -13,7 +13,8 @@ program
     .description('a kmer suite for fasta/fastq files')
     .version(pkginfo.version, '--version')
     .command('profile <seqfile>', 'Writes the kmer profile of <fastapath> to STDOUT', {isDefault: true})
-    .command('distance <seqfile1> <seqfile2> [otherSeqFiles...]', 'Generates a distance matrix of kmer profiles')
     .command('probability <query> <database>', 'Markov probability of the query sequence(s) given the database')
-    .parse(process.argv);
+    .command('distance <seqfile1> <seqfile2> [otherSeqFiles...]', 'Generates a distance matrix of kmer profiles')
 
+
+program.parse(process.argv)

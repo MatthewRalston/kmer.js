@@ -21,8 +21,10 @@ program
     .description('Markov probability of the query sequence(s) given the database')
     .arguments('<query> <database>')
     .option('-k <k>', 'k-mer size to use', parseInt)
+    .option('--strand-specific', 'Read profile in a strand-specific manner')
     .option('-v, --verbose', 'Enable log-level debugging')
     .action(function(query, database, options){
+	if (options.strandSpecific === undefined) options.strandSpecific = false;
 	if (options.verbose) logger.level = 'debug';
 	logger.level = 'debug';
 	if (options.K === undefined) options.K = k;
@@ -33,7 +35,7 @@ program
 	    process.exit(1);
 	} else {
 	    logger.debug(`k set to ${options.K}`);
-	    kmer = new kmerConstructor(options.K);
+	    kmer = new kmerConstructor(options.K, "ACTG", options.strandSpecific);
 	    fs.access(query, fs.constants.R_OK, function(err){
 		if (err){
 		    logger.debug("The <query> argument was not a filepath...");
@@ -45,31 +47,30 @@ program
 			process.exit(1);
 		    } else {
 			logger.debug("The <query> argument is a nucleic acid sequence");
-			reader.getProfile(options.K, database).then(function(prof){
+			reader.getProfile(options.K, database, options.strandSpecific).then(function(prof){
 			    kmer.profile = prof;
+			    kmer.TotalProfileCounts();
 			    console.log(kmer.probabilityOfSequence(query));
 			});
 		    }
 
 		} else {
 		    logger.debug(`The <query> argument '${query}' is a filepath...`);
-		    Promise.join(reader.readFasta(query), reader.getProfile(options.K, database), function(queries, prof){
-			kmer.profile = prof;
+		    Promise.join(reader.readFasta(query), reader.getProfile(options.K, database, options.strandSpecific), function(queries, finalKmer){
+			logger.debug(`Beginning probability calculations with ${finalKmer.totalProfileCounts} kmer counts`)
+			logger.debug("Profile generation complete, calculating probabilities");
 			return new Promise(function(resolve, reject){
-			    logger.debug("Normalizing profile. This could take a lot of memory");
-			    let profArr = Array.from(prof);
-			    let norm = profArr.map((x) => x*x).reduce((x,y) => x+y);
-			    resolve(profArr.map((x) => Number(Number(x/norm).toFixed(15))));
-			}).then(function(normalized){
-			    //logger.debug(normalized);
-			    kmer.normalizedProfile = normalized;
-			    logger.debug(`Calculating ${queries.length} probabilities`);
-			    return queries.map(function(seqobj, i){
-				logger.debug(`Sequence ${i}: Calculating transition probabilities of ${seqobj.seq.length - options.K + 1} ${options.K}-mers`);
-				return [seqobj.id, kmer.probabilityOfSequence(seqobj.seq)].join("\t");
-			    }).join("\n");
+			    logger.info(`Calculating ${queries.length} probabilities`);
+			    resolve(queries.map(function(seqobj, i){
+				logger.debug(`Sequence ${i} ${seqobj.id}: Calculating transition probabilities of ${seqobj.seq.length - options.K + 1} ${options.K}-mers`);
+				let logLikelihood = finalKmer.logLikelihood(seqobj.seq)
+				if (logLikelihood == '') return [seqobj.id, ''].join('\t');
+				else return [seqobj.id, logLikelihood/seqobj.seq.length].join("\t"); // Normalized for length of sequence
+
+			    }).join("\n"))
 			}).then(function(final){
-			    logger.debug("Done");
+			    logger.info("Done");
+			    console.log("sequence\tlogLikelihood")
 			    console.log(final);
 			});
 		    });
@@ -77,6 +78,8 @@ program
 	    });
 	}
     });
+
+
 
 program.parse(process.argv);
 

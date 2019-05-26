@@ -3,10 +3,11 @@
 const Type      = require('type-of-is');
 const through2  = require('through2');
 const BigNumber = require('bignumber.js');
+const Promise   = require('bluebird');
 
 // // Logger | enable only during debugging
-// var logger = require('./app/loadLogger').logger;
-// logger.level = 'debug';
+var logger = require('./app/loadLogger').logger;
+logger.level = 'debug';
 
 /**
  * Provides the Kmer class
@@ -38,15 +39,17 @@ class Kmer {
      *     Kmer = require('kmer.js')
      *     sampleA = new Kmer(9, "ACGT");
      */
-    constructor(k, letters){
+    constructor(k, letters, strandSpecific){
 	// Typecheck the args
 	var alphabet = letters || "ACGT";
+	var stranded = false;
 	if (!Type.is(k, Number)) throw TypeError("kmerJS takes an integer as its first positional argument");
 	else if (!isNaN(k) && k.toString().indexOf('.') != -1) throw TypeError("kmerJS takes an integer as its first positional argument. This was a float");
 	else if (!Type.is(alphabet, String)) throw TypeError("kmerJS expects the optional second positional argument to be a String");
 	else if (alphabet.length <= 1) throw TypeError("kmerJS expects the optional second positional argument to have a length > 1");
+	if (Type.is(strandSpecific, Boolean)) stranded = strandSpecific;
 
-	
+    	
 	//  Instance variables
 	/**
 	 * Choice of k used to instantiate, used throughout the instance methods
@@ -63,6 +66,23 @@ class Kmer {
 	 * @default "ACGT"
 	 */
 	this.alphabet = alphabet;
+	/**
+	 * The strand specificity of the profile generation routine
+	 *
+	 * @property strandSpecificity
+	 * @type Boolean
+	 **/
+	this.strandSpecificity = stranded;
+
+	/**
+	 * Whether all kmers have been loaded
+	 *
+	 * @property loaded
+	 * @type Boolean
+	 **/
+	this.loaded = false;
+	
+	
 	/**
 	 * A regular expression to match characters not belonging to the alphabet
 	 * 
@@ -100,15 +120,45 @@ class Kmer {
 	 * Recalculate after updating by running the TotalProfileCounts() method
 	 * 
 	 * @property totalProfileCounts
-	 * @type BigNumber
+	 * @type Number
 	 */
         this.totalProfileCounts = this.TotalProfileCounts();
       
 	// Necessary enforced binding of context because... through2 changes scope?
 	this.update = this.Update.bind(this);
-
+	this.reverseComplement = this.ReverseComplement.bind(this);
     }
 
+
+    /**
+     * Reverse complement a string
+     *
+     * @method ReverseComplement
+     * @param {String} seq A biological sequence to reverse complement
+     * @return {String} The reverse complement of the sequence
+     **/
+    ReverseComplement(seq){
+	if (!Type.is(seq, String)) throw TypeError();
+	else {
+	    let bases = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'};
+	    return seq.split('').map(function(c){
+		return bases[c];
+	    }).reverse().join('');
+	}
+    }
+
+    /**
+     * Sleep for a certain amount
+     *
+     * @method sleep
+     * @param {Number} ms Number of milliseconds to sleep
+     * @return {Promise} Return a promise after ms seconds
+    **/
+    async sleep(ms){
+	return new Promise(function(res){
+	    setTimeout(res, ms);
+	});
+    }
 
     /**
      * Returns a 32-bit int array of zeroes, given an alphabet and choice of k
@@ -210,22 +260,28 @@ class Kmer {
      *
      * @method update
      * @param {String} seq A String with letters matching the pre-specified alphabet
+     * @param {Object} thisArg A context, in case its needed
+     * @param {Function} callback
      * @throws {TypeError} If seq is not a String
      * @throws {TypeError} If the number of characters in seq < k
      * @throws {TypeError} If there are letters in seq that aren't in the sequence alphabet
      */
-    Update(seq, thisArg){
-	//console.log("this:", this)
-	var k = this.k;
-	//console.log("thisArg:", thisArg)
-	if (!Type.is(seq, String)) throw TypeError("kmer.update takes a String as its only positional argument");
-	else if (seq.length < this.k) throw TypeError(`kmer.update takes a String with length greater than ${this.k} as its only positional argument`);
+    Update(seq, thisArg, callback){
+	var k = thisArg.k;
+	if (!Type.is(seq, String)) throw TypeError("kmer.update takes a String as its first positional argument");
+	else if (seq.length < this.k) throw TypeError(`kmer.update takes a String with length greater than ${this.k} as its first positional argument`);
 	else if (seq.match(this.notInAlphabet)) throw new TypeError(`kmer.update takes a String with letters from the alphabet '${this.alphabet}'`);
+	else if (!Type.is(callback, Function)) throw new TypeError("kmer.update take a callback Function as its third positional argument");
 	else {
-	    let substrings = this.kmerArray(seq, this.k);
-	    while (substrings.length > 0){
-		this.profile[this.sequenceToBinary(substrings.pop())] += 1;
-	    }
+	    let substrings = thisArg.kmerArray(seq, thisArg.k);
+	    let i = 0;
+	    Promise.map(substrings, function(s){
+		thisArg.profile[thisArg.sequenceToBinary(s)]++;
+		i++;
+	    }, {concurrency: 1}).then(function(){
+		//logger.debug(`Processed ${i} kmers`);
+		callback();
+	    });
 	}
     };
 
@@ -263,21 +319,47 @@ class Kmer {
      *     >console.log(kmer.profile);
      */
     streamingUpdate(){
-	var update = this.update;
-	var thisArg = this;
+	let update = this.update;
+	let strandSpecificity = this.strandSpecificity;
+	let reverseComplement = this.reverseComplement;
+	let thisArg = this;
 	return through2.obj(function(data, enc, callback){
 	    if (!Type.is(data, Object)) throw TypeError("kmer.streamingUpdate expects the pipe to produce objects");
 	    else if (!data.hasOwnProperty("seq") && !Type.is(data.seq, String)) {
-		console.log(data);
 		throw TypeError("kmer.streamingUpdate expects the pipe to produce objects with a 'seq' attribute. See 'bionode-fasta' for examples.");
 	    }
-	  else {
-	    update(data.seq, thisArg);
-	    callback();
-	  }
+	    else {
+		let numkmers = data.seq.length - thisArg.k + 1;
+		let origCounts = thisArg.TotalProfileCounts();
+		//logger.debug("Starting to update profile for forward strand")
+		update(data.seq, thisArg, function(){
+		    
+		    //thisArg.TotalProfileCounts();
+		    //logger.debug("Finished updating profile for forward strand")
+		    //if (origCounts + numkmers !== thisArg.totalProfileCounts) throw new Error(`TotalProfileCounts ${thisArg.totalProfileCounts} does not match the number of original counts ${origCounts} + the number of processed kmers ${numkmers}`)
+		    //else if (!strandSpecificity) {
+		    if (!strandSpecificity) {
+			    //logger.debug(`Starting to update profile for reverse strand: ${thisArg.totalProfileCounts} total kmer counts`);
+			    update(reverseComplement(data.seq), thisArg, function(){
+				//thisArg.TotalProfileCounts();
+				//if (origCounts + 2*numkmers !== thisArg.totalProfileCounts) throw new Error(`TotalProfileCounts ${thisArg.totalProfileCounts} does not match the number of original couts ${origCounts} + 2x the number of processed kmers ${numkmers}`);
+				//else {
+				//logger.debug(`Finished updating profile for reverse strand: ${thisArg.totalProfileCounts} total kmer counts`)
+				thisArg.loaded = true;
+				callback();
+				//}
+			    });;
+
+		    } else {
+			thisArg.loaded = true;
+			callback();
+		    }
+		});
+	    }
 	});
     }
 
+    
     /**
      * Returns a binary representation/encoding of a biological sequence
      *
@@ -340,7 +422,7 @@ class Kmer {
      * It also updates the associated property .totalProfileCounts as a side-effect
      * 
      * @method TotalProfileCounts
-     * @return {BigNumber} Returns a BigNumber.js sum of all counts from the profile array
+     * @return {Number} Returns the sum of all counts from the profile array
      * 
      * @example
      *     >// After a streaming update, the attribute .totalProfileCounts isn't always updated
@@ -352,7 +434,7 @@ class Kmer {
      *     10300
      */
     TotalProfileCounts(){
-	this.totalProfileCounts = this.profile.reduce((a, b) => BigNumber(a).plus(BigNumber(b)));
+	this.totalProfileCounts = this.profile.reduce((a, b) => a+b);
 	return this.totalProfileCounts;
     }
 
@@ -375,10 +457,31 @@ class Kmer {
     frequency(seq){
 	if (!Type.is(seq, String)) throw TypeError("kmer.frequency takes a String as its only positional argument");
 	else if (seq.length != this.k) throw TypeError(`kmer.frequency takes a String with length ${this.k} as its only positional argument`);
-	else if (this.normalizedProfile === undefined) return this.profile[this.sequenceToBinary(seq)]/this.totalProfileCounts;
-	else return this.normalizedProfile[this.sequenceToBinary(seq)];
+	else return this.profile[this.sequenceToBinary(seq)]/this.totalProfileCounts;
     }
 
+    /**
+     * Returns the count of a kmer
+     * 
+     * @method count
+     * @param {String} seq A sequence to retrieve the absolute count
+     * @throws {TypeError} If seq is not a String
+     * @throws {TypeError} If seq is not a kmer (has a length of k)
+     * @return {Number} The count of the sequence from the profile
+     *
+     * @example
+     *     >var testKmer = "AAAAAAAAA";
+     *     >var testKmerFrequency = kmer.count(testKmer);
+     *     >console.log( testKmerFrequency );
+     *     5
+     */
+    count(seq){
+	if (!Type.is(seq, String)) throw TypeError("kmer.count takes a String as its only positional argument");
+	else if (seq.length != this.k) throw TypeError(`kmer.count takes a String with length ${this.k} as its only positional argument`);
+	else return this.profile[this.sequenceToBinary(seq)];
+    }
+
+    
     /**
      * Calculates the transition probability of one sequence to the next in a Markov chain
      * NOTE: May require at least one call to kmer.TotalProfileCounts()
@@ -407,59 +510,23 @@ class Kmer {
 	else {
 	    let suffix1 = seq1.substring(1, this.k);
 	    let prefix2 = seq2.substring(0, this.k - 1);
-	    if (suffix1 != prefix2) return 0;
+	    if (suffix1 !== prefix2) return 0; // The transition probability of two unrelated sequences is 0
 	    else {
-		let freq2 = this.frequency(seq2);
-		if (freq2 === 0) return 0;
+		let cnt = this.count(seq2);
+		if (cnt === 0) return 0; // If the numerator is 0, short circuit and return 0
 		else {
-		    let freqs = this.alphabet.split('').map((c) => this.frequency(suffix1 + c));
-		    //logger.debug(`'${seq1}'=>'${seq2}'`);
-		    //logger.debug(`${freq2} / ${freqs.join(" + ")}`);
-		    return freq2 / freqs.reduce((x,y) => x+y);
+		    let counts = this.alphabet.split('').map((c) => this.count(suffix1 + c));
+		    let sumcounts = counts.reduce((x,y) => x+y);
+		    // logger.warn(`'${seq1}'=>'${seq2}'`);
+		    // logger.warn(`${cnt} / ${counts.join(" + ")}`);
+
+		    return cnt / sumcounts;
 		}
 	    }
 	}
     }
 
 
-    // /**
-    //  * Karatsuba multiplication is much faster than standard multiplication
-    //  * This implementation is thanks to StackOverflow user 'vijayalakshmi d'
-    //  * https://stackoverflow.com/a/28376023/2005704
-    //  *
-    //  * @method karatsuba
-    //  * @param {Number} x
-    //  * @param {Number} y
-    //  * @return {Number} The product of x and y
-
-    //  *
-    //  **/
-    // karatsuba(x,y) {
-    // 	var x1,x0,y1,y0,base,m;
-    // 	base  = 10;
-    // 	if((x<base)||(y<base)){
-    // 	    return x * y;
-    // 	}
-
-    // 	var dummy_x = x.toString();
-    // 	var dummy_y = y.toString();
-
-    // 	var n = (dummy_x.length > dummy_y.length) ? dummy_y.length : dummy_x.length;
-    // 	m = Math.round(n/2);
-    // 	var high1 = parseInt(dummy_x.substring(0,dummy_x.length-m));
-    // 	var low1 = parseInt(dummy_x.substring(dummy_x.length-m,dummy_x.length  )) ;
-
-    // 	var high2 = parseInt(dummy_y.substring(0,dummy_y.length-m)); 
-    // 	var low2 = parseInt(dummy_y.substring(dummy_y.length-m,dummy_y.length));
-    // 	var z0   =   karatsuba( low1, low2);
-    // 	var z1   =   karatsuba(low1+high1, low2+high2);
-    // 	var z2   =   karatsuba(high1,high2);
-
-    // 	var res  =   (z2 *  Math.pow(10, 2 * m )  ) + ( (z1-z2-z0) * Math.pow(10,  m )) + z0;
-
-    // 	return res;
-
-    // }
 
     /**
      * Calculates the Markov chain probability of a sequence from its transition probabilities
@@ -469,7 +536,7 @@ class Kmer {
      * @throws {TypeError} If seq is not a String
      * @throws {TypeError} If seq is not larger than a kmer (has a length > k)
      * @throws {TypeError} If there are letters in seq that aren't in the sequence alphabet
-     * @return {BigNumber} Returns the Markov-chain probability of the input sequence
+     * @return {Number} Returns the Markov-chain probability of the input sequence
      * 
      * @example
      *     >var testKmer = "AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG";
@@ -482,11 +549,6 @@ class Kmer {
 	else if (seq.length <= this.k) throw TypeError("kmer.probabilityOfSequence takes a String with length greater than " + this.k + " as its only positional argument");
 	else if (seq.match(this.notInAlphabet)) throw TypeError(`kmer.probabilityOfSequence takes a String with letters from the alphabet '${this.alphabet}'`);
 	else {
-	    if (this.normalizedProfile === undefined) {
-		let fullProf = Array.from(this.profile);
-		let norm = fullProf.map((x) => x*x).reduce((x,y) => x+y);
-		this.normalizedProfile = Array.from(this.profile).map((x) => Number(Number(x/norm).toFixed(15)));
-	    }
 	    let self = this;					      
 	    let substrings = this.kmerArray(seq, this.k);
 	    let numsubstrings = substrings.length - 1;
@@ -495,14 +557,73 @@ class Kmer {
 		else return  self.transitionProbability(s, substrings[i+1]);
 	    });
 	    //logger.debug(transitionProbs);
+
+	    let px = self.frequency(substrings[0]);
+
 	    return transitionProbs.reduce(function(x,y){
 		return x*y;
-	    }, 1);
+	    }, px);
 
 	}
     }
 
-    
+
+    /**
+     * Calculates the log likelihood ratio of a sequence 
+     * 
+     * @param {String} seq A biological sequence
+     * @throws {TypeError} If seq is not a String
+     * @throws {TypeError} If seq is not larger than a kmer (has a length > k)
+     * @throws {TypeError} If there are letters in seq that aren't in the sequence alphabet
+     * @return {Number} Returns the log-likelihood ratio
+     * 
+     * @example
+     *     >var testKmer = "AAACCCCCGCACCCGCGGGGGTTTCAGCGTGTCG";
+     *     >var testKmerProb = kmer.probabilityOfSequence(testKmer);
+     *     >console.log( testKmerProb.toNumber() );
+     *     0.000033333888887777710
+     **/
+    logLikelihood(seq) {
+	if (!Type.is(seq, String)) throw TypeError("kmer.logLikelihood takes a String as its only positional argument");
+	else if (seq.length <= this.k) throw TypeError("kmer.logLikelihood takes a String with length greater than " + this.k + " as its only positional argument");
+	else if (seq.match(this.notInAlphabet)) throw TypeError(`kmer.logLikelihood takes a String with letters from the alphabet '${this.alphabet}'`);
+	else {
+	    let self = this;
+	    self.TotalProfileCounts();
+	    let prof = self.profile;
+	    let substrings = this.kmerArray(seq, this.k);
+	    let numsubstrings = substrings.length - 1;
+	    //logger.debug(`Beginning calculation from a profile of ${self.totalProfileCounts} counts`);
+
+	    let loglikelihoods = substrings.map(function(s, i) {
+		if (i === numsubstrings) return 0; // Ignore the terminal kmer, which does not have a transition probability
+		else {
+		    let suffix1 = s.substring(1, self.k);
+		    let cnt = self.count(substrings[i+1]);
+		    let possibleTransitions = self.alphabet.split('').map((c) => suffix1 + c)
+		    let counts = possibleTransitions.map((x) => self.count(x))
+		    //logger.debug(`${s} => ${substrings[i+1]} / ${possibleTransitions.join(' + ')}: ${cnt} / ${counts.join(' + ')}`)
+		    return Math.log( cnt / counts.reduce((x,y) => x+y));
+		}
+	    });
+	    if (isNaN(loglikelihoods.reduce((x,y) => x+y))) {
+		//logger.debug(loglikelihoods)
+		//logger.warn(`Abberrant sequence '${seq}' is unlikely given the model. It has at least one NaN or infinite probability`)
+		return '' // Or NaN?
+	    } else if (loglikelihoods.reduce((x,y) => x+y) == 0) {
+		logger.debug(loglikelihoods);
+		logger.warn(`Abberrant sequence '${seq}' has a log-likelihood of 0`)
+		return ''
+	    } else if (isFinite(loglikelihoods.reduce((x,y) => x+y))) return loglikelihoods.reduce((x,y) => x+y);
+	    else {
+		//logger.debug(loglikelihoods)
+		//logger.warn(`Sequence '${seq}' has an infinite probability. One or more transition probabilities was infinite. Even more specifically, the count of at least one of the k-mers was 0. When log transformed, the transition probability is -infinity`)
+		return '' // Or NaN?
+	    }
+
+	}
+    }
+
 
     
     /*
@@ -590,7 +711,7 @@ class Kmer {
 	    //let ssxx = normalizedA.map((a) => Math.pow(a-meanA, 2)).reduce((x,y) => x+y);
 	    let ssyy = normalizedB.map((b) => b*b).reduce((x,y)=>x+y) - n*meanB*meanB;
 	    //let ssyy = normalizedB.map((b) => Math.pow(b - meanB, 2)).reduce((x,y) => x+y);
-	    return Number(Number(ssxy/Math.sqrt(ssxx*ssyy)).toFixed(5));
+	    return Number(Number(ssxy/Math.sqrt(ssxx*ssyy)).toFixed(10));
 	}
     }
     

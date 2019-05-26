@@ -80,6 +80,22 @@ Train the profile with a Amazon AWS S3 stream
 >console.log(kmer.profile);
 ```
 
+Train the profile with a fastq filestream
+```javascript
+>var AWS = require('aws-sdk');
+>var s3 = new AWS.S3({apiVersio: '2006-03-01'}};
+>var fastq = require('./app/fastq');
+>var params = {Bucket: 'bucketname', Key: 'path/to/file.fastq.gz'}
+>s3.getObject(params).createReadStream()
+  .pipe(zlib.createUnzip())
+  .pipe(fastq.obj())
+  .pipe(kmer.streamingUpdate())
+  .on('finish', function(){
+    console.log('Done');
+  })
+>console.log(kmer.profile);
+```
+
 Get the count of a single kmer from the profile
 
 ```javascript

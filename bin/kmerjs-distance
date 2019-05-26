@@ -10,7 +10,6 @@ const reader = require('./../app/readProfile').getProfile;
 const logger = require('./../app/loadLogger').logger;
 // Initialize
 var k = 12;
-var kmer;
 const validDistances = ['correlation', 'euclidean'];
 
 
@@ -20,8 +19,10 @@ program
     .arguments('<seqpath1> <seqpath2> [otherSeqPaths...]')
     .option('-k <k>', `k-mer size to use. (default: ${k})`, parseInt)
     .option('-d, --distance <dist>', `distance metric to use: ${validDistances}`, 'correlation')
+    .option('--strand-specific', 'Read profile in a strand-specific manner')
     .option('-v, --verbose', 'Enable log-level debugging')
     .action(function(seqpath1, seqpath2, otherSeqPaths, options){
+	if (options.strandSpecific === undefined) options.strandSpecific = false;
 	if (options.verbose) logger.level = 'debug';
 	if (options.K === undefined) options.K = k;
 	if (!Type.is(options.K, Number)) {
@@ -29,58 +30,60 @@ program
 	    process.exit(1);
 	} else {
 	    logger.debug(`k set to ${options.K}`);
-	    kmer = new kmerConstructor(options.K);
-	    if (!otherSeqPaths.length) {
-		logger.info(`Calculating distance of normalized profiles of '${seqpath1}' to '${seqpath2}'`)
-	    	let kmer = new kmerConstructor(options.K);
-		Promise.join(reader(options.K, seqpath1), reader(options.K, seqpath2), function(p1, p2){
-		    if (options.distance === 'correlation') console.log(kmer.correlation(p1, p2));
-		    else if (options.distance === 'euclidean') console.log(kmer.euclidean(p1, p2));
-		    else {
-			logger.error(`kmerjs-distance hasn't implemented distance metric '${options.distance}'`)
-			process.exit(1);
-		    }
-		});
-
-	    } else { // Matrix
-		otherSeqPaths.unshift(seqpath1, seqpath2);
-		logger.info(`Calculating correlation matrix of normalized profiles of the following sequence files:\n${otherSeqPaths.join('\n')}`)
-		let kmer = new kmerConstructor(options.K);
-		let data = []
-		let profs = Promise.each(otherSeqPaths, function(i){
-		    return new Promise(function(resolve, reject){
-			reader(options.K, i).then(function(j){
-			    data.push(j);
-			    resolve(j)
-			});
+	    if (!otherSeqPaths.length) otherSeqPaths = []
+	    otherSeqPaths.unshift(seqpath1, seqpath2);
+	    logger.info(`Calculating correlation matrix of normalized profiles of the following sequence files:\n${otherSeqPaths.map((x)=>"\t"+x).join('\n')}`)
+	    let data = []
+	    let profs = Promise.each(otherSeqPaths, function(i){
+		return new Promise(function(resolve, reject){
+		    reader(options.K, i, options.strandSpecific).then(function(j){
+			data.push(j);
+			resolve(j)
 		    });
 		});
+	    });
 
-		return Promise.all(profs).then(function(){
-		    console.log(data.map(function(x, i){
-			return data.map(function(y, j){
-			    let c = [i,j].sort().join('')
-			    if (x === y) {
-				if (options.distance === 'correlation') return 1;
-				else if (options.distance === 'euclidean') return 0;
-			    } else if (j > i) {
-				return '';
-			    }else {
-				if (options.distance === 'correlation') return kmer.correlation(x, y);
-				else if (options.distance === 'euclidean') return kmer.euclidean(x, y);
-				else {
-				    logger.error(`kmerjs-distance has not implemented distance metric '${options.distance}'`);
-				}
-
+	    return Promise.all(profs).then(function(){
+		logger.debug("All profiles loaded. Calculating correlations")
+		return data.map(function(x, i){
+		    return data.map(function(y, j){
+			if (x.profile === y.profile) {
+			    if (options.distance === 'correlation') return 1;
+			    else if (options.distance === 'euclidean') return 0;
+			    else {
+				logger.error(`kmerjs-distance has not implemented distance metric '${options.distance}'`);
+				process.exit(1)
 			    }
-			}).reduce(function(total, z){
-			    total.push(z);
-			    return total;
-			}, []);
-				  
-		    }).map((a) => a.join("\t")).join("\n"));
+			} else if (j > i) { // Only compute each distance once.
+			    return '';
+			}else {
+			    if (options.distance === 'correlation') return x.correlation(x.profile, y.profile);
+			    else if (options.distance === 'euclidean') return x.euclidean(x.profile, y.profile);
+			    else {
+				logger.error(`kmerjs-distance has not implemented distance metric '${options.distance}'`);
+				process.exit(1)
+			    }
+			}
+		    }).reduce(function(total, z){
+			total.push(z);
+			return total;
+		    }, []);
 		});
-	    }
+
+
+	    }).then(function(corr){
+		// Fill in upper triangular missing values
+		for (i=0; i < corr.length; i++){
+		    for (j=0; j < corr.length; j++){
+			if (j > i) {
+			    corr[i][j] = corr[j][i];
+			} else continue;
+		    }
+		}
+		logger.info("Done");
+		if (corr.length === 2) console.log(corr[1][0]);
+		else console.log(corr.map((a) => a.join("\t")).join("\n"));
+	    });
 	}
     });
 program.parse(process.argv);

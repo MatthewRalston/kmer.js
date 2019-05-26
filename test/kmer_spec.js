@@ -736,12 +736,12 @@ describe("kmerJS", function(){
 	        .on('finish', done);
 	});
 
-	it("returns a BigNumber", function(){
-	    expect(kmer.TotalProfileCounts()).to.be.an.instanceof(BigNumber);
+	it("returns a number", function(){
+	    expect(kmer.TotalProfileCounts()).to.be.a('number');
 	});
 	it("returns a sum of profile counts", function(){
-	    var expectedSum = expectedProfile.reduce((a, b) => a + b);
-	    expect(kmer.TotalProfileCounts().toNumber()).to.equal(expectedSum);
+	    var expectedSum = Array.from(expectedProfile).reduce((a, b) => a + b);
+	    expect(kmer.TotalProfileCounts()).to.equal(expectedSum);
 	});
     });
     describe("frequency()", function(){
