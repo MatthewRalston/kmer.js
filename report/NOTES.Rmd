@@ -1,0 +1,356 @@
+---
+title: Kmer.JS ELN
+author: "Matthew Ralston <mrals89@gmail.com>"
+header-includes:
+  \usepackage{fancyhdr}
+  \usepackage{graphicx}
+  \AtBeginDocument{\let\maketitle\relax}
+  \newcommand{\beginsupplement}{\setcounter{table}{0}\renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}
+}
+output: pdf_document
+
+bibliography: bibliography.bib
+---
+
+
+\makeatletter
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \fancyhead[L]{\Large \textbf{\@title} \\ \large \@author}
+  \fancyhead[R]{\href{https://matthewralston.us}{Analyst}}
+}
+
+\pagestyle{plain}
+\vspace*{1\baselineskip}
+
+
+
+
+
+```{r include=F, message=F, echo=F, warning=F}
+set.seed(1234)
+gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
+
+
+
+library('ggplot2')
+library('scales')
+library('fitdistrplus')
+
+
+
+###################################
+#  F u n  c t i o n s
+###################################
+median.quartile <- function(x){
+    out <- quantile(x, probs = c(0.25,0.5,0.75))
+    names(out) <- c("ymin","y","ymax")
+    return(out) 
+}
+
+bottom.quartile <- function(x){
+    out <- quantile(x,probs=c(0.25))
+    return(out)
+}
+
+top.quartile <- function(x){
+    out <- quantile(x,probs=c(0.75))
+    return(out)
+}
+
+```
+
+
+
+
+
+
+
+
+
+## Abstract
+
+
+
+## Document Purpose
+
+In contrast to the CHANGELOG.md, this file is a log (an ELN of sorts) of my thought process through debugging or improving specific calculations or models. It is ordered chronologically, as the questioned occurred, rather than reflecting specific timings of implementation or organized in a way that reflects interactions/separations in functions. It's a human and scientific document, not a integration testing document.
+
+
+## Introduction
+
+
+
+## Methodology
+
+
+## Results
+
+
+
+
+### Outstanding concerns
+
+Many issues remain in the formulation of the probability calculation, addressed below. Additionally, the calculation of sequence profiles from streamed fastq files is taking a considerable amount of time. Each individual read might only contain a small number of kmers, but the object creation and streaming libraries used make the streaming of individual reads slow. Generating a profile from even 50k 150bp reads take longer than the correlation calculation does.
+
+
+### K-mer count distribution
+
+A first and obvious question to ask is how the k-mer count distribution changes as a function of k? The distribution of all counts in a profile is effected first and foremost by sequencing depth. That said, a certain assumption can be made for well characterized microbial genomes; such genomes are considered fairly complete and whole-genome sequencing (WGS) inputs from those microbes would likely have similar k-mer profiles. That said, normalized count and/or frequency vectors can be used (described below) for calculations where those parameters are important. For example, the normalized count vector or similarly the frequency vector of an ideally assembled genome represent its true k-mer counts, to which the WGS would increasingly reflect under ideal sequencing conditions and optimal sequencing depth. The k-mer count distribution has applications in the choice of null-model for probabilistic calculations from k-mer profiles.
+
+
+
+#### Generate count profiles for different choices of k
+
+Shown below is a graph of the distribution of counts under varying choices of k. While the parameterizations are unique for each choice of k, the best model suggested by the [`fitdistrplus` package](#### Robustness of count distribution to k
+) is negative binomial and seems to be the consistently best choice under reasonable choices of k(@cullen1999probabilistic, @delignete2015fitdistrplus). It is worth noting that larger choices of k > 12 can lead to more specificity than required for most microbial genomes: $4^{-12} = $`4^-12`, while choices less than 10 (each k-mer has a uniquess described by `4^10`, roughly 1-in-3 for a 3M+ sized microbial genome) may risk loss of specificity for certain unique k-mers. 
+
+
+```bash
+export organism='C. aceto'
+for k in $(seq 8 2 12);
+do
+  export k
+  bin/kmerjs profile -k $k $FASTA | perl -n -a -e 'print "$F[0]\t$ENV{k}\t$ENV{organism}\n"' >> Cac_kmer_counts.txt
+done
+```
+
+
+```{r fig.cap="Jitter plot / histogram of k-mer counts"}
+counts <- read.table("test/data/Cac_kmer_counts.txt", sep="\t", header=F)
+colnames(counts) <- c("Count", "k", "Organism")
+ggplot(counts, aes(y=Count, x=k)) + geom_jitter() +
+  scale_y_log10(breaks=10**(0:4),labels=trans_format('log10',math_format(10^.x))) + 
+  annotation_logticks(base=10,sides='l') +
+  stat_summary(fun.y=median,fun.ymax=top.quartile,fun.ymin=bottom.quartile,geom='crossbar',colour='red') + 
+  theme(axis.title.x=element_blank(),axis.text.y=element_text(colour="black"),axis.text.x=element_text(colour="black"))
+```
+
+```{r fig.cap="Model recommendation from Skewness/Kurtosis analysis of discrete k-mer counts (n=1048576)"}
+
+descdist(counts[counts$k == 10,]$Count, discrete=T, boot=20)
+```
+That said, the negative binomial fit recommended by the supplemental figures is overlaid on the histogram below along with a kernel density estimate.
+
+```{r fig.cap="Negative binomial model fit (red) with kernel density estimate (black)"}
+
+k=10
+nb.fit <- fitdist(counts[counts$k == k,]$Count, 'nbinom', discrete=T)
+summary(nb.fit)
+plot(nb.fit)
+nb_estimate <- as.list(nb.fit$estimate)
+####################################
+# Zero-truncated negative binomial
+####################################
+# Neither implementation of the ztnbinom function was running properly
+
+#library('countreg') # https://rdrr.io/rforge/countreg/
+#nb_estimates <- as.list(nb.fit$estimate)
+#nb_estimates$theta <- nb_estimates$size
+#ztnb.fit <- fitdist(d$Count, 'ztnbinom', discrete=T, start=nb_estimates)
+
+#library('actuar')
+#nb_estimates <- as.list(nb.fit$estimate)
+#nb_estimates <- list(prob=nb_estimates$mu, size=nb_estimates$size)
+#ztnb.fit <- fitdist(d$Count, 'ztnbinom', discrete=T, start=nb_estimates)
+#ztnb.fit <- fitdist(d$Count, 'ztnbinom', discrete=T, start=nb_estimates, method='mme', order=c(1,2))
+
+
+x <- seq(0,600)
+df <- data.frame(x=x, y=dnbinom(x, size=nb_estimate$size, mu=nb_estimate$mu))
+p <- ggplot(counts[counts$k == k,], aes(x=Count, y=..density..)) + geom_histogram() + ggtitle("Hisogram of 10-mer counts") 
+p + geom_density() + geom_line(data=df[1:350,], aes(x=x,y=y), color='red')
+
+
+```
+
+#### Scalability of profile command
+1. Scalability with genome size, k
+2. show viruses, microbes, and eukaryotes
+
+
+### Correlations between species, sequencing runs
+
+#### Correlations of undersequenced samples vs the ideal assembled genome approach unity with increasing depth
+1. Demonstrate the value of normalized correlations
+2. Precision approaches unity (corr. coef. vs depth)
+3. Tolerance of kmer profile to indel rate
+
+The choice of range of the sweep is informed by the *C. acetobutylicum* genome size (3.94M bp of chromosome and 192k bp pSol or 8,265,716 12-mers). 2.7M artificial 150bp reads representing a 100x fold coverage were generated from the *C. acetobutylicum* genome with `art_illumina`. These reads were subject to subsampling with `seqtk sample` to represent a range of undersampling and oversampling of the *C. acetobutylicum genome* with artificial reads shown in the table below.
+
+
+| Sample size | Base pairs | K-mers | Fold coverage | k-mer coverage |
+|-------------|------------|--------|---------------|----------------|
+| 1k          | 150k       | 278K   | ~3%           | 3.5%           |
+| 10k         | 1.5M       | 2.78M  | 30%           | 35%            |
+| 100k        | 15M        | 27.8M  | 3x            | 3.5x           |
+| 300k        | 45M        | 83.4M  | 9x            | 10x            |
+
+
+```bash
+# Generate a representative and oversequenced sample with basic indel error profile
+# Simulating HiSeq 2500x series reads, readlength of 150, 100x coverage
+art_illumina -ss HS25 -i $FASTA -l 150 -f 100 -o single_out
+
+subsample(){
+  s=$1
+  echo "Running in $(pwd)"
+  sample=$(mktemp tmp.XXXX.fastq)
+  seqtk sample -s $RANDOM single_out.fq $s > $sample
+  corr=$(bin/kmerjs distance --distance correlation $sample $FASTA)
+  echo -e "${s}\t${corr}" >> Cac_subsample_correlations.txt
+}
+#### Calculate 100 subsamples of each depth
+parallel 'subsample {1}' ::: $(seq 5000 20000 290000) ::: $(seq 1 30) # 15x30 subsamplings
+
+```
+
+
+
+
+
+#### Similarity metrics and normalization
+
+The first two distance metrics that came to mind were euclidean distance and correlation coefficient. The first issue was normalization of profiles to remove the issue of sequencing depth from the observed counts/frequencies. Correlation distance can remove some but not all of this noise in the frequencies, but it would be even smoother if the input was a normalized vector. The frequencies were obvious next choices, but some k-mer frequencies are so low that they risk bumping into the floating point precision. Necessarily the sum of frequencies is ~1 (again floating point precision) while another normalized vector could be the unit vector of the kmer counts, whose sum is necessarily greater than 1, but magnitude is equal to 1. I decided on the euclidean distance and the correlation coefficient (not coefficient of determination) of unit vectors. As a test case for this, I have included in `test/data` microbial genomes, and the table below reflects the intuitive similarities of these microbes.
+
+1. Implement D2S metric
+2. Compare trees from different metrics
+
+#### Similarity of microbial genomes
+
+```bash
+bin/kmerjs distance test/data/Cacetobutylicum_ATCC824.fasta.gz\
+test/data/Cacetobutylicum_DSM1731.fasta.gz\
+test/data/Cacetobutylicum_EA2018.fasta.gz\
+test/data/Cbeijerinckii_NCIMB14988.fasta.gz\
+test/data/Cdifficile_R3.fasta.gz\
+test/data/Ecoli_K12MG1655.fasta.gz
+```
+
+|                            | C. aceto 824 | C. aceto DSM1731 | C. aceto EA2018 | C. beijerinckii NCIMB14988 | C. difficile R3 | E. coli K-12 MG1655 |
+|----------------------------|--------------|------------------|-----------------|----------------------------|-----------------|---------------------|
+| C. acetobutylicum 824      | 1            |                  |                 |                            |                 |                     |
+| C. acetobutylicum DSM1731  | 0.99977      | 1                |                 |                            |                 |                     |
+| C. acetobutylicum EA2018   | 0.9995       | 0.9997           | 1               |                            |                 |                     |
+| C. beijerinckii NCIMB14988 | 0.75695      | 0.75693          | 0.7569          | 1                          |                 |                     |
+| C. difficile R3            | 0.72802      | 0.72798          | 0.72799         | 0.7654                     | 1               |                     |
+| E. coli K-12 MG1655        | 0.06249      | 0.06248          | 0.06249         | 0.06784                    | 0.05644         | 1                   |
+
+
+| | B. subtilis 168 | C. acetobutylicum 824 | C. acetobutylicum DSM1731 | C. acetobutylicum EA2018 | C. beijerinckii NCIMB14988 | C. difficile R3 | C. pasteurianum ATCC6013 | C. pasteurianum BC1 | C. perfringens ATCC13124 | C. tetani E88 | E. coli K-12 MG1655 | B. subtilis 168 | C. acetobutylicum 824 | C. acetobutylicum DSM1731 | C. acetobutylicum EA2018 | C. beijerinckii NCIMB14988 | C. difficile R3 | C. pasteurianum ATCC6013 | C. pasteurianum BC1 | C. perfringens ATCC13124 | C. tetani E88 | E. coli K-12 MG1655 |
+| B. subtilis 168 | 1       0.310497422     0.3104439861    0.3104199942    0.3057637176    0.2782488548    0.2756879639    0.2848844597    0.2696774104    0.2690387223    0.1751863426
+| C. acetobutylicum 824 | 0.310497422     1       0.9997682188    0.9994961294    0.7569505757    0.7280186683    0.7304794024    0.7369347589    0.7369019631    0.729933753     0.0624857552
+| C. acetobutylicum DSM1731 | 0.3104439861    0.9997682188    1       0.9997004159    0.7569298942    0.7279832267    0.7304359178    0.7368996778    0.7369091867    0.7299223485    0.062481127
+| C. acetobutylicum EA2018 | 0.3104199942    0.9994961294    0.9997004159    1       0.7568956643    0.7279889541    0.7304460913    0.7368528841    0.7368808244    0.7298999535    0.0624851259
+| C. beijerinckii NCIMB14988 | 0.3057637176    0.7569505757    0.7569298942    0.7568956643    1       0.7654042428    0.7644587966    0.7724305698    0.7815743399    0.7612962383    0.0678397037
+| C. difficile R3 | 0.2782488548    0.7280186683    0.7279832267    0.7279889541    0.7654042428    1       0.7396797431    0.7417945835    0.7542060889    0.7535569254    0.05643749
+| C. pasteurianum ATCC6013 | 0.2756879639    0.7304794024    0.7304359178    0.7304460913    0.7644587966    0.7396797431    1       0.7897058523    0.7411092587    0.7433755334    0.0630234878
+| C. pasteurianum BC1 | 0.2848844597    0.7369347589    0.7368996778    0.7368528841    0.7724305698    0.7417945835    0.7897058523    1       0.7446882488    0.743334781     0.0656784755
+| C. perfringens ATCC13124 | 0.2696774104    0.7369019631    0.7369091867    0.7368808244    0.7815743399    0.7542060889    0.7411092587    0.7446882488    1       0.7712176115    0.0515636121
+| C. tetani E88 | 0.2690387223    0.729933753     0.7299223485    0.7298999535    0.7612962383    0.7535569254    0.7433755334    0.743334781     0.7712176115    1       0.0507458042
+| E. coli K-12 MG1655 | 0.1751863426    0.0624857552    0.062481127     0.0624851259    0.0678397037    0.05643749      0.0630234878    0.0656784755    0.0515636121    0.0507458042    1
+
+
+#### Scalability of different correlations
+1. Number of pairwise comparisons (sigma sigma n*m, size of microbial genomes)
+2. Number of reads with a single microbial genome
+
+### Probability of a sequence
+
+First let me clarify the distinction between a 'database' and a 'query'. A query is a single or multiple query sequences, either a sequence string or a Fasta file of sequences to estimate the corresponding probabilties from. The database is a Fasta file or Fastq files that could be concatenated from multiple data sources. Ultimately, the database provides the frequencies of individual kmers describing a (meta)genomic sequence environment from which we are trying to estimate probabilities of larger sequences (query length is >= k) from the frequencies of the smaller k-mers. It's worth noting that splitting the sequences of the database file into kmers discard some positional information that simply tells us whether or not one of the larger queries has been observed at least once. However, that type of problem is a substring problem and not covered by the scope of this toolkit. 
+
+Instead, we are looking for probabilities of the queries as the frequencies from database become increasingly accurate. For example, take the human genome. After calculating the frequencies for some choice of k, we would like a query of a human hexokinase to give a probability close to one. In contrast, we would hope that a bacterial hexokinase has some sequence features that are 'different' from the human genome, and thus its probability should be much lower (not necessarily 0). We would also like the probability to zero out if a certain kmer in the query has not been observed at all in the database. This choice should reduce false positive rate of any probabilities calculated.
+
+Now that this has been described, my initial formulation was the product of transition probabilities $a\_{st}$(see @durbin1998biological, pp. 46-50, eq. 3.1, 3.2). However, this is more in line with an expected frequency of the corresponding query, rather than a probability of the sequence compared to some null or uniform model. Initial experimentation (not included) showed that the probability of some known subsequences of the *C. acetobutylicum* were 0 or otherwise extremely close to 0. As I searched for a proper formulation, I also discovered an implementation detail that was at first confusing to me.
+
+### Multiplication speed
+
+Calculating these probabilities requires a considerable number of multiplications, and is linear in the sum of the lengths of those sequences. For example, there are n-k+1 kmers for a sequence of length n, and the transition probability of each kmer to the next requires some number of multiplications. For a time I was using BigNumber.js for the purposes of precision, but calculation of the probability of a single sequence was taking hoursk = 10
+, not seconds. The first bug eliminated was repeated calls in `kmer.transitionProbability` to the `kmer.TotalProfileCounts()` function, which was resulting in repetitive summations. After eliminating this call, I looked at alternative multiplication strategies on both integers and floats. I considered 3 possible multiplication strategies: BigNumber.js multiplication, base Node V8 (v12) multiplication on the 64bit Number type, and Karatsuba multiplication which is commented in the codebase (a9825eddc). The result was that base V8 multiplication was fastest, between 400-500 ops/sec on both integers and floating points (n = 65). BigNumber.js was second place for integers (100M hz) and Karatsuba was second place for floats (62M hz). After changing my initial prototype to use base arithmetic and eliminating the redundant summations, the total runtime decreased to mere seconds for transition probability calculations, even though the formula is lackluser.
+
+
+
+
+### Refactor of probability function
+
+It can be argued that the k-mer frequency vector and the unit-vector are proportional though not interchangeable. I refactored the probability calculation again to use frequencies and removed a `0/0` division bug in the `transitionProbability` function. While the individual subroutines are now more performant, the desired formulation for the probability eludes me. However, the first additional adjustment required for the `probabilityOfSequence` function to correctly reflect the Markov formulation(@durbin1998biological, p. 48) was to multiply the product of transition probabilities with the frequency of the 0th kmer. Additionally, a detail of the transition probability formulation (p. 50) is that the transition probabilities can and should be expressed with a ratio of counts, rather than a ratio of frequencies. 
+
+The choice of a null model is important when comparing the observed counts or frequencies of kmers to what could be referred to as the 'random' or some null model. For example, a first choice of null model could be that the kmer counts are uniformly distributed amongst the kmers. In this case, each transition probability is 1/4 and the `probabilityOfSequence` would simply be $(T/4^{k})*(n-k)*0.25$. If T is the total counts from the genome or database and 4<sup>k</sup> is the number of total kmers, this ratio is the uniform frequency for the 0th kmer. There are n-k transition probabilities and each transition probability is 1/4. Alternatively, the transition probability could be 0.25 if it is actually present in the genome or database, and 0 elsewhere. This revised null model would better represent the database and reduce false positive rate because it would zero any sequence with a kmer that hasn't been observed. It's important to note that the log-likelihoods are not length normalized and the choice of the alpha parameter for the log likelihood should be chosen from a large number of sequences.
+
+A more robust transition probability would take GC-content into account and use a better measure of central tendency.
+
+```bash
+# Calculate the likelihoods of Cac transcripts from a profile of the Cac gennome
+bin/kmerjs probability CAC_transcripts.fa test/data/Cacetobutylicum_ATCC824.fasta.gz
+# Calculate the likelihoods of E. coli transcripts from a profile of the Cac gennome
+bin/kmerjs probability Ecoli_K12MG1655.transcripts.fa test/data/Cacetobutylicum_ATCC824.fasta.gz
+```
+
+
+
+```{r fig.cap="\\label{fig:figs}Separation of \\textit{C. ac} transcript likelihoods from \\textit{E. coli} under a \\textit{C. ac} k-mer model. Likelihood ratio and null model definition provided above."}
+
+cac_under_cac <- read.table("test/data/CAC_transcript_likelihoods_from_CAC_model.tsv", sep="\t", header=T)
+eco_under_cac <- read.table("test/data/Ecoli_transcript_likelihoods_from_CAC_model.tsv", sep="\t", header=T, na.strings = '')
+cac_under_cac$organism <- 'C. aceto'
+eco_under_cac$organism <- 'E. coli'
+d <- rbind(cac_under_cac, eco_under_cac)
+ggplot(d) + geom_density(aes(x=logLikelihood, colour=organism)) +
+  ylab("Probability Density") + xlab("Length-normalized Log Likelihood Ratio") #+ ggtitle(expression(paste("Log-likelihoods of ", italic("E. coli"), " and ", italic("C. acetobutylicum"), " transcripts in ", italic("C. ac"), " model")))
+
+```
+
+```{r fig.cap="\\label{fig:figs}Separation of \\textit{E. coli} transcript likelihoods from \\textit{C. ac} under a \\textit{E. coli} k-mer model. "}
+
+cac_under_eco <- read.table("test/data/CAC_transcript_likelihoods_from_Eco_model.tsv", sep="\t", header=T)
+eco_under_eco <- read.table("test/data/Ecoli_transcript_likelihoods_from_Eco_model.tsv", sep="\t", header=T)
+cac_under_eco$organism <- 'C. aceto'
+eco_under_eco$organism <- 'E. coli'
+d <- rbind(cac_under_eco, eco_under_eco)
+ggplot(d) + geom_density(aes(x=logLikelihood, colour=organism)) +
+  ylab("Probability Density") + xlab("Length-normalized Log Likelihood Ratio") #+ ggtitle(expression(paste("Log-likelihoods of ", italic("E. coli"), " and ", italic("C. acetobutylicum"), " transcripts in ", italic("C. ac"), " model")))
+
+```
+
+
+
+
+
+The bimodality of the likelihoods of the database organism's transcripts shows a problem with the formulation. The transition probabilities zeroed prior to summation result in a number of transcripts that aren't very likely. These are most likely transcripts from the reverse complement strand and represent a slightly different k-mer profile that wasnt included during profile generation. I've spent 4-6 hours refactoring the profile reading routine to include k-mers from the reverse strand, but I am noticing that there are many kmers that aren't being properly tallied and my best guess is MUTEX during concurrency of the `while` loop that was initially incrementing the kmer counts.
+
+
+
+In contrast to this, an alternate strategy would be to use a Bayesian method to estimate the likelihood of the data given the null model.
+
+
+## References
+
+
+## Supplemental
+
+\beginsupplemental
+
+#### Alternate histogram of 10-mer distributions
+
+
+```{r fig.cap="Alternative histogram showing the discrete distribution of count data"}
+k = 10
+ggplot(counts[counts$k == k,], aes(x=Count)) + geom_histogram() + scale_y_log10() + scale_y_log10(breaks=10**(0:6), labels=trans_format('log10', math_format(10^.x))) + annotation_logticks(base=10, sides='l') + xlab("K-mer Count") + ggtitle(paste("Log-transformed histogram of", 4^k, "k-mers"))
+```
+
+
+
+
+#### Robustness of count distribution to k
+
+Three graphs represent suggestions for the discrete distribution model of three choices of k: 8, 10, and 12. The graphs clearly indicate that increasing choices of k lead to deviations from basic parameterized ranges of the negative-binomial distribution, although it is likely a strong fit for the distribution of counts (@cullen1999probabilistic, @delignete2015fitdistrplus). 
+
+```{r fig.cap="a) Skewness-Kurtosis suggestion for best fit discrete distribution (k=8). b) (k=10) c) (k=12)"}
+for (x in c(8,10,12)) {
+  descdist(counts[counts$k == x,]$Count, discrete=T, boot=20)
+  
+}
+```
+
+

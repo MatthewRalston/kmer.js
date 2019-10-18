@@ -1,3 +1,23 @@
+* Asymptotic accuracy of normalized profile
+** asymptotic accuracy/distance of profiles with different error profiles
+** art_illumina
+*** -ss HS25 -l 150 -f 100 
+*** snp_free -qL 40 -qM 40
+*** indel_free -dr 0.0 -dr2 0.0
+*** realistic_error_profile 
+*** error_free -dr 0.0 -dr2 0.0 -qL 40 -qU 40
+
+* Distribution of kmer counts with choices of k
+* Inter-species correlation
+** C. pasteurianum
+** C. perfringen
+** C. tetani
+** B. subtilis
+
+
+
+
+----- PRE DATA LOSS
 
 * Refactors
 ** probabilityOfSequence, transitionPorbability, and frequency

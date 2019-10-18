@@ -19,7 +19,7 @@ program
     .arguments('<seqpath1> <seqpath2> [otherSeqPaths...]')
     .option('-k <k>', `k-mer size to use. (default: ${k})`, parseInt)
     .option('-d, --distance <dist>', `distance metric to use: ${validDistances}`, 'correlation')
-    .option('--strand-specific', 'Read profile in a strand-specific manner')
+    .option('--strand-specific', 'Read profile from forward strand only')
     .option('-v, --verbose', 'Enable log-level debugging')
     .action(function(seqpath1, seqpath2, otherSeqPaths, options){
 	if (options.strandSpecific === undefined) options.strandSpecific = false;
